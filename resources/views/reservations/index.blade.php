@@ -62,13 +62,20 @@
                 <th>Check In</th>
                 <th>Check Out</th>
                 <th>Status</th>
-                <th>Total</th>
+                <th>Base Total</th>
+                <th>Restaurant</th>
+                <th>Grand Total</th>
                 <th>Paid</th>
+                <th>Remaining</th>
                 <th>Action</th>
             </tr>
         </thead>
         <tbody>
             @forelse ($reservations as $reservation)
+            @php
+            $remainingAmount = $reservation->grand_total - $reservation->paid_amount;
+            @endphp
+
             <tr>
                 <td>{{ $reservation->reservation_code }}</td>
                 <td>{{ $reservation->guest->first_name }} {{ $reservation->guest->last_name }}</td>
@@ -80,28 +87,35 @@
                     </span>
                 </td>
                 <td>{{ number_format($reservation->total_amount, 2) }}</td>
+                <td>{{ number_format($reservation->restaurant_total, 2) }}</td>
+                <td>{{ number_format($reservation->grand_total, 2) }}</td>
                 <td>{{ number_format($reservation->paid_amount, 2) }}</td>
+                <td>{{ number_format($remainingAmount, 2) }}</td>
                 <td>
-                    <a href="{{ route('reservations.show', $reservation) }}" class="btn btn-success">View</a>
+                    <div class="action-buttons">
+                        <a href="{{ route('reservations.show', $reservation) }}" class="btn btn-success">View</a>
 
-                    @auth
-                    @if (auth()->user()->isAdmin())
-                    <a href="{{ route('reservations.edit', $reservation) }}" class="btn btn-warning">Edit</a>
+                        @auth
+                        @if (auth()->user()->canManageFrontDesk())
+                        <a href="{{ route('reservations.edit', $reservation) }}" class="btn btn-warning">Edit</a>
+                        @endif
 
-                    <form action="{{ route('reservations.destroy', $reservation) }}" method="POST" class="inline-form">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this reservation?')">
-                            Delete
-                        </button>
-                    </form>
-                    @endif
-                    @endauth
+                        @if (auth()->user()->isAdmin())
+                        <form action="{{ route('reservations.destroy', $reservation) }}" method="POST" class="inline-form">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this reservation?')">
+                                Delete
+                            </button>
+                        </form>
+                        @endif
+                        @endauth
+                    </div>
                 </td>
             </tr>
             @empty
             <tr>
-                <td colspan="8">No reservations found.</td>
+                <td colspan="11">No reservations found.</td>
             </tr>
             @endforelse
         </tbody>

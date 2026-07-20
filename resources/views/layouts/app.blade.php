@@ -200,8 +200,7 @@
         }
 
         .container {
-            width: 92%;
-            max-width: 1200px;
+            width: min(1450px, calc(100% - 40px));
             margin: 30px auto;
         }
 
@@ -323,10 +322,12 @@
 
         .table-responsive {
             overflow-x: auto;
+            width: 100%;
         }
 
         table {
             width: 100%;
+            min-width: 1150px;
             border-collapse: collapse;
             background: #fff;
             margin-top: 12px;
@@ -338,6 +339,7 @@
             border-bottom: 1px solid #e5e7eb;
             text-align: left;
             font-size: 14px;
+            vertical-align: top;
         }
 
         table th {
@@ -522,7 +524,78 @@
             box-shadow: 0 0 0 2px #93c5fd;
         }
 
+        .payment-progress-wrap {
+            margin-bottom: 14px;
+        }
+
+        .payment-progress-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .payment-progress-bar {
+            width: 100%;
+            height: 14px;
+            appearance: none;
+            -webkit-appearance: none;
+            border: none;
+            border-radius: 999px;
+            overflow: hidden;
+            background: #e5e7eb;
+        }
+
+        .payment-progress-bar::-webkit-progress-bar {
+            background: #e5e7eb;
+            border-radius: 999px;
+        }
+
+        .payment-progress-bar.paid-full::-webkit-progress-value {
+            background: #16a34a;
+            border-radius: 999px;
+        }
+
+        .payment-progress-bar.paid-partial::-webkit-progress-value {
+            background: #2563eb;
+            border-radius: 999px;
+        }
+
+        .payment-progress-bar.paid-full::-moz-progress-bar {
+            background: #16a34a;
+            border-radius: 999px;
+        }
+
+        .payment-progress-bar.paid-partial::-moz-progress-bar {
+            background: #2563eb;
+            border-radius: 999px;
+        }
+
+        .action-buttons {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .action-buttons .inline-form {
+            margin: 0;
+        }
+
+        .action-buttons .btn {
+            white-space: nowrap;
+        }
+
+        table td:last-child {
+            min-width: 180px;
+        }
+
         @media (max-width: 992px) {
+            .container {
+                width: min(100%, calc(100% - 24px));
+            }
 
             .stats-grid,
             .room-board-grid {
@@ -544,6 +617,10 @@
 
             .nav-links {
                 gap: 12px;
+            }
+
+            table {
+                min-width: 900px;
             }
         }
 
@@ -588,6 +665,7 @@
 
             table {
                 page-break-inside: auto;
+                min-width: 100% !important;
             }
 
             tr {
@@ -617,6 +695,7 @@
 
             @if (in_array(auth()->user()->role, ['admin', 'receptionist']))
             <a href="{{ route('reservations.index') }}">Reservations</a>
+            <a href="{{ route('restaurant-orders.index') }}">Restaurant Orders</a>
             @endif
 
             <div class="dropdown">
@@ -637,6 +716,9 @@
                     @if (auth()->user()->role === 'admin')
                     <a href="{{ route('room-types.index') }}">Room Types</a>
                     <a href="{{ route('staff.index') }}">Staff</a>
+                    <a href="{{ route('taxes.index') }}">Taxes</a>
+                    <a href="{{ route('menu-categories.index') }}">Menu Categories</a>
+                    <a href="{{ route('menu-items.index') }}">Menu Items</a>
                     @endif
                 </div>
             </div>

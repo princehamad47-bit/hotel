@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reservation Invoice</title>
+    <title>Restaurant Invoice</title>
     <style>
         body {
             font-family: Arial, Helvetica, sans-serif;
@@ -15,7 +15,7 @@
         }
 
         .invoice-wrapper {
-            max-width: 1000px;
+            max-width: 950px;
             margin: auto;
             background: #fff;
             padding: 30px;
@@ -142,137 +142,81 @@
 
 <body>
     @php
-    $roomTotal = $reservation->reservationRooms->sum('subtotal');
-    $serviceTotal = $reservation->reservationServices->sum('total_price');
-    $restaurantTotal = $reservation->restaurantOrders->where('status', '!=', 'cancelled')->sum('grand_total');
-    $subTotal = $roomTotal + $serviceTotal + $restaurantTotal;
-    $taxTotal = $reservation->taxes->sum('tax_amount');
-    $grandTotal = $subTotal + $taxTotal;
-    $paidTotal = $reservation->payments->where('payment_status', 'paid')->sum('amount');
-    $remainingTotal = $grandTotal - $paidTotal;
+    $paidTotal = $restaurantOrder->payments->where('payment_status', 'paid')->sum('amount');
+    $remainingTotal = $restaurantOrder->grand_total - $paidTotal;
     @endphp
 
     <div class="invoice-wrapper">
         <div class="topbar">
             <div>
-                <div class="title">Reservation Invoice</div>
-                <div class="muted">Invoice for reservation {{ $reservation->reservation_code }}</div>
+                <div class="title">Restaurant Invoice</div>
+                <div class="muted">Invoice for order {{ $restaurantOrder->order_code }}</div>
             </div>
 
             <div class="detail-box">
-                <p><strong>Reservation Code:</strong> {{ $reservation->reservation_code }}</p>
-                <p><strong>Status:</strong> {{ str_replace('_', ' ', ucfirst($reservation->status)) }}</p>
+                <p><strong>Order Code:</strong> {{ $restaurantOrder->order_code }}</p>
+                <p><strong>Status:</strong> {{ ucfirst($restaurantOrder->status) }}</p>
                 <p><strong>Invoice Date:</strong> {{ now()->format('Y-m-d H:i') }}</p>
             </div>
         </div>
 
         <div class="grid-2">
             <div class="section">
-                <h3>Guest Details</h3>
+                <h3>Customer Details</h3>
                 <div class="detail-box">
-                    <p><strong>Name:</strong> {{ $reservation->guest->first_name }} {{ $reservation->guest->last_name }}</p>
-                    <p><strong>Phone:</strong> {{ $reservation->guest->phone ?? '-' }}</p>
-                    <p><strong>Email:</strong> {{ $reservation->guest->email ?? '-' }}</p>
-                    <p><strong>Address:</strong> {{ $reservation->guest->address ?? '-' }}</p>
+                    <p>
+                        <strong>Name:</strong>
+                        @if ($restaurantOrder->guest)
+                        {{ $restaurantOrder->guest->first_name }} {{ $restaurantOrder->guest->last_name }}
+                        @elseif ($restaurantOrder->reservation?->guest)
+                        {{ $restaurantOrder->reservation->guest->first_name }} {{ $restaurantOrder->reservation->guest->last_name }}
+                        @else
+                        {{ $restaurantOrder->customer_name ?? '-' }}
+                        @endif
+                    </p>
+                    <p>
+                        <strong>Phone:</strong>
+                        {{ $restaurantOrder->customer_phone ?? ($restaurantOrder->guest?->phone ?? $restaurantOrder->reservation?->guest?->phone ?? '-') }}
+                    </p>
+                    <p><strong>Order Type:</strong> {{ ucwords(str_replace('_', ' ', $restaurantOrder->order_type)) }}</p>
+                    <p><strong>Table Number:</strong> {{ $restaurantOrder->table_number ?? '-' }}</p>
                 </div>
             </div>
 
             <div class="section">
-                <h3>Reservation Details</h3>
+                <h3>Reference Details</h3>
                 <div class="detail-box">
-                    <p><strong>Check In Date:</strong> {{ $reservation->check_in_date->format('Y-m-d') }}</p>
-                    <p><strong>Check Out Date:</strong> {{ $reservation->check_out_date->format('Y-m-d') }}</p>
-                    <p><strong>Adults:</strong> {{ $reservation->adults }}</p>
-                    <p><strong>Children:</strong> {{ $reservation->children }}</p>
-                    <p><strong>Booking Source:</strong> {{ $reservation->booking_source ?? '-' }}</p>
+                    <p><strong>Reservation:</strong> {{ $restaurantOrder->reservation?->reservation_code ?? '-' }}</p>
+                    <p><strong>Notes:</strong> {{ $restaurantOrder->notes ?? '-' }}</p>
+                    <p><strong>Total Items:</strong> {{ $restaurantOrder->items->count() }}</p>
                 </div>
             </div>
         </div>
 
         <div class="section">
-            <h3>Room Charges</h3>
+            <h3>Order Items</h3>
             <table>
                 <thead>
                     <tr>
-                        <th>Room</th>
-                        <th>Room Type</th>
-                        <th>Rate</th>
-                        <th>Nights</th>
+                        <th>Item</th>
+                        <th>Category</th>
+                        <th>Unit Price</th>
+                        <th>Quantity</th>
                         <th>Subtotal</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse ($reservation->reservationRooms as $item)
+                    @forelse ($restaurantOrder->items as $item)
                     <tr>
-                        <td>{{ $item->room->room_number }}</td>
-                        <td>{{ $item->room->roomType->name }}</td>
-                        <td>{{ number_format($item->room_rate, 2) }}</td>
-                        <td>{{ $item->nights }}</td>
+                        <td>{{ $item->item_name }}</td>
+                        <td>{{ $item->menuItem?->menuCategory?->name ?? '-' }}</td>
+                        <td>{{ number_format($item->unit_price, 2) }}</td>
+                        <td>{{ $item->quantity }}</td>
                         <td>{{ number_format($item->subtotal, 2) }}</td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5">No room charges found.</td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-
-        <div class="section">
-            <h3>Service Charges</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Service</th>
-                        <th>Room</th>
-                        <th>Quantity</th>
-                        <th>Status</th>
-                        <th>Total Price</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($reservation->reservationServices as $item)
-                    <tr>
-                        <td>{{ $item->service->name }}</td>
-                        <td>{{ $item->room?->room_number ?? '-' }}</td>
-                        <td>{{ $item->quantity }}</td>
-                        <td>{{ ucfirst(str_replace('_', ' ', $item->status)) }}</td>
-                        <td>{{ number_format($item->total_price, 2) }}</td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="5">No service charges found.</td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-
-        <div class="section">
-            <h3>Restaurant Charges</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Order Code</th>
-                        <th>Type</th>
-                        <th>Status</th>
-                        <th>Items</th>
-                        <th>Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($reservation->restaurantOrders->where('status', '!=', 'cancelled') as $restaurantOrder)
-                    <tr>
-                        <td>{{ $restaurantOrder->order_code }}</td>
-                        <td>{{ ucwords(str_replace('_', ' ', $restaurantOrder->order_type)) }}</td>
-                        <td>{{ ucfirst($restaurantOrder->status) }}</td>
-                        <td>{{ $restaurantOrder->items->count() }}</td>
-                        <td>{{ number_format($restaurantOrder->grand_total, 2) }}</td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="5">No restaurant charges found.</td>
+                        <td colspan="5">No order items found.</td>
                     </tr>
                     @endforelse
                 </tbody>
@@ -291,7 +235,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse ($reservation->taxes as $tax)
+                    @forelse ($restaurantOrder->taxes as $tax)
                     <tr>
                         <td>{{ $tax->tax_name }}</td>
                         <td>{{ ucfirst($tax->tax_type) }}</td>
@@ -326,7 +270,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse ($reservation->payments as $payment)
+                    @forelse ($restaurantOrder->payments as $payment)
                     <tr>
                         <td>{{ number_format($payment->amount, 2) }}</td>
                         <td>{{ ucfirst(str_replace('_', ' ', $payment->payment_method)) }}</td>
@@ -346,28 +290,16 @@
         <div class="summary">
             <table>
                 <tr>
-                    <td>Room Total</td>
-                    <td>{{ number_format($roomTotal, 2) }}</td>
-                </tr>
-                <tr>
-                    <td>Service Total</td>
-                    <td>{{ number_format($serviceTotal, 2) }}</td>
-                </tr>
-                <tr>
-                    <td>Restaurant Total</td>
-                    <td>{{ number_format($restaurantTotal, 2) }}</td>
-                </tr>
-                <tr>
                     <td>Subtotal</td>
-                    <td>{{ number_format($subTotal, 2) }}</td>
+                    <td>{{ number_format($restaurantOrder->subtotal, 2) }}</td>
                 </tr>
                 <tr>
                     <td>Tax Total</td>
-                    <td>{{ number_format($taxTotal, 2) }}</td>
+                    <td>{{ number_format($restaurantOrder->tax_total, 2) }}</td>
                 </tr>
                 <tr>
                     <td>Grand Total</td>
-                    <td>{{ number_format($grandTotal, 2) }}</td>
+                    <td>{{ number_format($restaurantOrder->grand_total, 2) }}</td>
                 </tr>
                 <tr>
                     <td>Paid</td>
@@ -382,7 +314,7 @@
 
         <div class="actions">
             <button onclick="window.print()" class="btn btn-primary">Print Invoice</button>
-            <a href="{{ route('reservations.show', $reservation) }}" class="btn btn-secondary">Back</a>
+            <a href="{{ route('restaurant-orders.show', $restaurantOrder) }}" class="btn btn-secondary">Back</a>
         </div>
     </div>
 </body>

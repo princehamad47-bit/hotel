@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Reservation extends Model
 {
@@ -49,10 +50,52 @@ class Reservation extends Model
         return $this->hasMany(ReservationService::class);
     }
 
-    public function rooms()
+    public function rooms(): BelongsToMany
     {
         return $this->belongsToMany(Room::class, 'reservation_rooms')
             ->withPivot(['room_rate', 'nights', 'subtotal'])
             ->withTimestamps();
+    }
+
+    public function taxes(): HasMany
+    {
+        return $this->hasMany(\App\Models\ReservationTax::class);
+    }
+
+    public function restaurantOrders(): HasMany
+    {
+        return $this->hasMany(\App\Models\RestaurantOrder::class);
+    }
+
+    public function getRoomTotalAttribute()
+    {
+        return $this->reservationRooms->sum('subtotal');
+    }
+
+    public function getServiceTotalAttribute()
+    {
+        return $this->reservationServices->sum('total_price');
+    }
+
+    public function getRestaurantTotalAttribute()
+    {
+        return $this->restaurantOrders()
+            ->whereNotIn('status', ['cancelled'])
+            ->sum('subtotal');
+    }
+
+    public function getSubTotalAttribute()
+    {
+        return $this->room_total + $this->service_total + $this->restaurant_total;
+    }
+
+    public function getTaxTotalAttribute()
+    {
+        return $this->taxes->sum('tax_amount');
+    }
+
+    public function getGrandTotalAttribute()
+    {
+        return $this->sub_total + $this->tax_total;
     }
 }

@@ -8,13 +8,18 @@ use App\Models\Room;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class ReservationController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Reservation::with(['guest', 'reservationRooms.room']);
+        $query = Reservation::with([
+            'guest',
+            'reservationRooms.room',
+            'reservationServices',
+            'taxes',
+            'restaurantOrders',
+        ]);
 
         if ($request->filled('reservation_code')) {
             $query->where('reservation_code', 'like', '%' . $request->reservation_code . '%');
@@ -186,6 +191,9 @@ class ReservationController extends Controller
             'reservationRooms.room.roomType',
             'payments',
             'reservationServices.service',
+            'reservationServices.room',
+            'taxes',
+            'restaurantOrders.items',
         ]);
 
         return view('reservations.show', compact('reservation'));
@@ -197,7 +205,10 @@ class ReservationController extends Controller
             'guest',
             'reservationRooms.room.roomType',
             'reservationServices.service',
+            'reservationServices.room',
             'payments',
+            'taxes',
+            'restaurantOrders.items',
         ]);
 
         return view('reservations.invoice', compact('reservation'));
@@ -283,6 +294,8 @@ class ReservationController extends Controller
             $reservation->update([
                 'total_amount' => $this->calculateReservationTotal($reservation),
             ]);
+
+            $this->recalculateReservationTaxes($reservation);
         });
 
         return redirect()
@@ -292,6 +305,10 @@ class ReservationController extends Controller
 
     public function destroy(Reservation $reservation)
     {
+        if (!auth()->user()->isAdmin()) {
+            abort(403, 'Only admin can delete reservations.');
+        }
+
         $reservation->delete();
 
         return redirect()
@@ -341,61 +358,92 @@ class ReservationController extends Controller
             ]);
         }
 
-        DB::transaction(function () use ($reservation) {
-            $reservation->load([
-                'reservationRooms.room.roomType',
-                'reservationServices',
+        $reservation->load([
+            'reservationRooms.room.roomType',
+            'reservationServices',
+            'taxes',
+            'payments',
+            'restaurantOrders',
+        ]);
+
+        if ($reservation->grand_total > $reservation->paid_amount) {
+            return back()->withErrors([
+                'payment' => 'Reservation cannot be checked out until full payment is received.',
             ]);
+        }
 
-            $actualCheckOutDate = now()->toDateString();
-            $roomIds = $reservation->reservationRooms->pluck('room_id')->toArray();
+        try {
+            DB::transaction(function () use ($reservation) {
+                $actualCheckOutDate = now()->toDateString();
+                $roomIds = $reservation->reservationRooms->pluck('room_id')->toArray();
 
-            if ($actualCheckOutDate !== $reservation->check_out_date->toDateString()) {
-                $reservation->update([
-                    'check_out_date' => $actualCheckOutDate,
-                ]);
+                if ($actualCheckOutDate !== $reservation->check_out_date->toDateString()) {
+                    $reservation->update([
+                        'check_out_date' => $actualCheckOutDate,
+                    ]);
 
-                $nights = Carbon::parse($reservation->check_in_date)
-                    ->diffInDays(Carbon::parse($reservation->check_out_date));
+                    $nights = Carbon::parse($reservation->check_in_date)
+                        ->diffInDays(Carbon::parse($reservation->check_out_date));
 
-                if ($nights < 1) {
-                    $nights = 1;
+                    if ($nights < 1) {
+                        $nights = 1;
+                    }
+
+                    $reservation->reservationRooms()->delete();
+
+                    foreach ($roomIds as $roomId) {
+                        $room = Room::with('roomType')->findOrFail($roomId);
+
+                        $roomRate = $room->roomType->base_price;
+                        $subtotal = $roomRate * $nights;
+
+                        $reservation->reservationRooms()->create([
+                            'room_id' => $room->id,
+                            'room_rate' => $roomRate,
+                            'nights' => $nights,
+                            'subtotal' => $subtotal,
+                        ]);
+                    }
+
+                    $reservation->update([
+                        'total_amount' => $this->calculateReservationTotal($reservation),
+                    ]);
+
+                    $this->recalculateReservationTaxes($reservation);
+
+                    $paidAmount = $reservation->payments()
+                        ->where('payment_status', 'paid')
+                        ->sum('amount');
+
+                    $reservation->update([
+                        'paid_amount' => $paidAmount,
+                    ]);
+
+                    $reservation->refresh();
+
+                    if ($reservation->grand_total > $reservation->paid_amount) {
+                        throw new \RuntimeException('Payment not complete after final checkout recalculation.');
+                    }
                 }
 
-                $reservation->reservationRooms()->delete();
+                $reservation->load('reservationRooms.room');
 
-                foreach ($roomIds as $roomId) {
-                    $room = Room::with('roomType')->findOrFail($roomId);
+                $reservation->update([
+                    'status' => 'checked_out',
+                    'checked_out_at' => now(),
+                ]);
 
-                    $roomRate = $room->roomType->base_price;
-                    $subtotal = $roomRate * $nights;
-
-                    $reservation->reservationRooms()->create([
-                        'room_id' => $room->id,
-                        'room_rate' => $roomRate,
-                        'nights' => $nights,
-                        'subtotal' => $subtotal,
+                foreach ($reservation->reservationRooms as $reservationRoom) {
+                    $reservationRoom->room->update([
+                        'status' => 'cleaning',
                     ]);
                 }
-
-                $reservation->update([
-                    'total_amount' => $this->calculateReservationTotal($reservation),
-                ]);
-            }
-
-            $reservation->load('reservationRooms.room');
-
-            $reservation->update([
-                'status' => 'checked_out',
-                'checked_out_at' => now(),
+            });
+        } catch (\RuntimeException $e) {
+            return back()->withErrors([
+                'payment' => 'Reservation cannot be checked out because the final bill is not fully paid.',
             ]);
-
-            foreach ($reservation->reservationRooms as $reservationRoom) {
-                $reservationRoom->room->update([
-                    'status' => 'cleaning',
-                ]);
-            }
-        });
+        }
 
         return redirect()
             ->route('reservations.show', $reservation)
@@ -443,6 +491,27 @@ class ReservationController extends Controller
         return (float) ($roomTotal + $serviceTotal);
     }
 
+    private function recalculateReservationTaxes(Reservation $reservation): void
+    {
+        $restaurantTotal = $reservation->restaurantOrders()
+            ->whereNotIn('status', ['cancelled'])
+            ->sum('grand_total');
+
+        $subtotal = $reservation->reservationRooms()->sum('subtotal')
+            + $reservation->reservationServices()->sum('total_price')
+            + $restaurantTotal;
+
+        foreach ($reservation->taxes as $reservationTax) {
+            $taxAmount = $reservationTax->tax_type === 'percentage'
+                ? ($subtotal * $reservationTax->tax_value) / 100
+                : $reservationTax->tax_value;
+
+            $reservationTax->update([
+                'tax_amount' => round($taxAmount, 2),
+            ]);
+        }
+    }
+
     public function guestSearch(Request $request)
     {
         $query = trim($request->get('q', ''));
@@ -468,8 +537,7 @@ class ReservationController extends Controller
         $hotelCode = strtoupper(config('app.hotel_code', 'HOTEL'));
         $datePart = now()->format('Ymd');
 
-        $todayCount = \App\Models\Reservation::whereDate('created_at', now()->toDateString())->count() + 1;
-
+        $todayCount = Reservation::whereDate('created_at', now()->toDateString())->count() + 1;
         $sequence = str_pad($todayCount, 4, '0', STR_PAD_LEFT);
 
         return "{$hotelCode}-{$datePart}-{$sequence}";

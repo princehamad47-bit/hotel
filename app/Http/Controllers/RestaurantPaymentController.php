@@ -2,23 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Payment;
-use App\Models\Reservation;
+use App\Models\RestaurantOrder;
+use App\Models\RestaurantPayment;
 use Illuminate\Http\Request;
 
-class PaymentController extends Controller
+class RestaurantPaymentController extends Controller
 {
-    public function create(Reservation $reservation)
+    public function create(RestaurantOrder $restaurantOrder)
     {
-        $reservation->load(['guest', 'reservationRooms', 'reservationServices', 'taxes']);
+        $restaurantOrder->load(['guest', 'reservation.guest']);
 
-        return view('payments.create', compact('reservation'));
+        return view('restaurant-payments.create', compact('restaurantOrder'));
     }
 
-    public function store(Request $request, Reservation $reservation)
+    public function store(Request $request, RestaurantOrder $restaurantOrder)
     {
-        $reservation->load(['reservationRooms', 'reservationServices', 'taxes']);
-
         $validated = $request->validate([
             'amount' => ['required', 'numeric', 'min:0.01'],
             'payment_method' => ['required', 'in:cash,card,bank_transfer'],
@@ -28,7 +26,7 @@ class PaymentController extends Controller
             'notes' => ['nullable', 'string'],
         ]);
 
-        $remainingAmount = $reservation->grand_total - $reservation->paid_amount;
+        $remainingAmount = $restaurantOrder->grand_total - $restaurantOrder->paid_amount;
 
         if ($validated['payment_status'] === 'paid' && $validated['amount'] > $remainingAmount) {
             return back()
@@ -38,8 +36,8 @@ class PaymentController extends Controller
                 ->withInput();
         }
 
-        Payment::create([
-            'reservation_id' => $reservation->id,
+        RestaurantPayment::create([
+            'restaurant_order_id' => $restaurantOrder->id,
             'amount' => $validated['amount'],
             'payment_method' => $validated['payment_method'],
             'payment_status' => $validated['payment_status'],
@@ -48,20 +46,20 @@ class PaymentController extends Controller
             'notes' => $validated['notes'] ?? null,
         ]);
 
-        $this->updateReservationPaidAmount($reservation);
+        $this->updateRestaurantOrderPaidAmount($restaurantOrder);
 
         return redirect()
-            ->route('reservations.show', $reservation)
-            ->with('success', 'Payment added successfully.');
+            ->route('restaurant-orders.show', $restaurantOrder)
+            ->with('success', 'Restaurant payment added successfully.');
     }
 
-    private function updateReservationPaidAmount(Reservation $reservation): void
+    private function updateRestaurantOrderPaidAmount(RestaurantOrder $restaurantOrder): void
     {
-        $paidAmount = $reservation->payments()
+        $paidAmount = $restaurantOrder->payments()
             ->where('payment_status', 'paid')
             ->sum('amount');
 
-        $reservation->update([
+        $restaurantOrder->update([
             'paid_amount' => $paidAmount,
         ]);
     }
