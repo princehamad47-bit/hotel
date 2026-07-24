@@ -68,10 +68,27 @@
 <div class="card">
     <h3 class="section-title">Quick Actions</h3>
     <div class="quick-links">
+        @can('module-access',['reservations', 'create'])
         <a href="{{ route('reservations.create') }}" class="btn btn-primary">New Reservation</a>
+        @endcan
+        @can('module-access',['guests', 'create'])
         <a href="{{ route('guests.create') }}" class="btn btn-success">Add Guest</a>
+        @endcan
+        @can('module-access',['rooms', 'create'])
         <a href="{{ route('rooms.index') }}" class="btn btn-warning">Open Rooms</a>
+        @endcan
+        @can('module-access',['services', 'create'])
         <a href="{{ route('services.create') }}" class="btn btn-secondary">Add Service</a>
+        @endcan
+        @can('module-access',['restaurant-orders', 'create'])
+        <a href="{{ route('restaurant-orders.create') }}" class="btn btn-primary">Add Order</a>
+        @endcan
+        @can('module-access',['menu-categories', 'create'])
+        <a href="{{ route('menu-categories.create') }}" class="btn btn-success">Add Menu Categories</a>
+        @endcan
+        @can('module-access',['menu-items', 'create'])
+        <a href="{{ route('menu-items.create') }}" class="btn btn-warning">Add Order</a>
+        @endcan
     </div>
 </div>
 
@@ -218,7 +235,7 @@
 @auth
 <div class="card">
     <p><strong>Logged in user:</strong> {{ auth()->user()->name }}</p>
-    <p><strong>Role:</strong> {{ ucfirst(auth()->user()->role) }}</p>
+    <p><strong>Role:</strong> {{ ucfirst(auth()->user()->role->name) }}</p>
 </div>
 @endauth
 @endsection

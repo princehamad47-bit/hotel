@@ -45,11 +45,9 @@
         <button type="submit" class="btn btn-primary">Search</button>
         <a href="{{ route('reservations.index') }}" class="btn btn-secondary">Reset</a>
 
-        @auth
-        @if (auth()->user()->canManageFrontDesk())
+        @can('module-access',['orders','create'])
         <a href="{{ route('reservations.create') }}" class="btn btn-success">+ Create Reservation</a>
-        @endif
-        @endauth
+        @endcan
     </form>
 </div>
 
@@ -94,13 +92,12 @@
                 <td>
                     <div class="action-buttons">
                         <a href="{{ route('reservations.show', $reservation) }}" class="btn btn-success">View</a>
-
-                        @auth
-                        @if (auth()->user()->canManageFrontDesk())
+                        
+                        @can('module-access', ['reservations', 'update'])
                         <a href="{{ route('reservations.edit', $reservation) }}" class="btn btn-warning">Edit</a>
-                        @endif
+                        @endcan
 
-                        @if (auth()->user()->isAdmin())
+                        @can('module-access', ['reservations', 'delete'])
                         <form action="{{ route('reservations.destroy', $reservation) }}" method="POST" class="inline-form">
                             @csrf
                             @method('DELETE')
@@ -108,8 +105,7 @@
                                 Delete
                             </button>
                         </form>
-                        @endif
-                        @endauth
+                        @endcan
                     </div>
                 </td>
             </tr>

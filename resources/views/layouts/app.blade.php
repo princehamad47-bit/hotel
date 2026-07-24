@@ -689,37 +689,50 @@
         <div class="nav-links">
             <a href="{{ route('dashboard') }}">Home</a>
 
-            @if (in_array(auth()->user()->role, ['admin', 'receptionist', 'housekeeping']))
+            @can('module-access',['rooms', 'read'])
             <a href="{{ route('rooms.board') }}">Room Board</a>
-            @endif
+            @endcan
 
-            @if (in_array(auth()->user()->role, ['admin', 'receptionist']))
+            @can('module-access',['reservations', 'read'])
             <a href="{{ route('reservations.index') }}">Reservations</a>
+            @endcan
+            @can('module-access',['restaurant-orders', 'read'])
             <a href="{{ route('restaurant-orders.index') }}">Restaurant Orders</a>
-            @endif
-
+            @endcan
             <div class="dropdown">
                 <button type="button" class="dropdown-toggle">Maintenance ▾</button>
 
                 <div class="dropdown-menu">
-                    @if (in_array(auth()->user()->role, ['admin', 'receptionist']))
+                    @can ('module-access',['guests', 'read'])
                     <a href="{{ route('guests.index') }}">Guests</a>
+                    @endcan
+                    @can ('module-access',['reports', 'read'])
                     <a href="{{ route('reports.index') }}">Reports</a>
-                    @endif
-
-                    @if (in_array(auth()->user()->role, ['admin', 'housekeeping']))
+                    @endcan
+                    @can ('module-access',['rooms', 'read'])
                     <a href="{{ route('rooms.index') }}">Rooms</a>
+                    @endcan
+                    @can ('module-access',['services', 'read'])
                     <a href="{{ route('services.index') }}">Services</a>
+                    @endcan
+                    @can ('module-access',['reservations', 'read'])
                     <a href="{{ route('reservation-services.index') }}">Reservation Services</a>
-                    @endif
-
-                    @if (auth()->user()->role === 'admin')
+                    @endcan
+                    @can ('module-access',['room-types', 'read'])
                     <a href="{{ route('room-types.index') }}">Room Types</a>
+                    @endcan
+                    @can ('module-access',['staff', 'read'])
                     <a href="{{ route('staff.index') }}">Staff</a>
+                    @endcan
+                    @can ('module-access',['taxes', 'read'])
                     <a href="{{ route('taxes.index') }}">Taxes</a>
+                    @endcan
+                    @can ('module-access',['menu-categories', 'read'])
                     <a href="{{ route('menu-categories.index') }}">Menu Categories</a>
+                    @endcan
+                    @can ('module-access',['menu-items', 'read'])
                     <a href="{{ route('menu-items.index') }}">Menu Items</a>
-                    @endif
+                    @endcan
                 </div>
             </div>
 
@@ -728,7 +741,7 @@
 
                 <div class="hotel-user-menu">
                     <div class="hotel-user-name">{{ auth()->user()->name }}</div>
-                    <div class="hotel-user-role">{{ ucfirst(auth()->user()->role) }}</div>
+                    <div class="hotel-user-role">{{ ucfirst(auth()->user()->role->name) }}</div>
 
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
