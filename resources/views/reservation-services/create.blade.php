@@ -4,8 +4,7 @@
 <h1 class="page-title">Add Reservation Service</h1>
 
 <div class="card">
-    @auth
-    @if (auth()->user()->canManageHousekeeping())
+    @can('module-access', ['reservation-services', 'create'])
     <form method="POST" action="{{ route('reservation-services.store') }}">
         @csrf
 
@@ -96,12 +95,10 @@
     @else
     <p class="muted">You do not have permission to create reservation services.</p>
     <a href="{{ route('reservation-services.index') }}" class="btn btn-secondary">Back</a>
-    @endif
-    @endauth
+    @endcan
 </div>
 
-@auth
-@if (auth()->user()->canManageHousekeeping())
+@can('module-access', ['reservation-services', 'create'])
 <script>
     document.getElementById('reservation_id').addEventListener('change', function() {
         if (this.value) {
@@ -109,6 +106,5 @@
         }
     });
 </script>
-@endif
-@endauth
+@endcan
 @endsection

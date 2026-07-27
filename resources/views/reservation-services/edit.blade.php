@@ -4,8 +4,7 @@
 <h1 class="page-title">Edit Reservation Service</h1>
 
 <div class="card">
-    @auth
-    @if (auth()->user()->canManageHousekeeping())
+    @can('module-access', ['reservation-services', 'update'])
     <form method="POST" action="{{ route('reservation-services.update', $reservationService->id) }}">
         @csrf
         @method('PUT')
@@ -91,7 +90,6 @@
     @else
     <p class="muted">You do not have permission to edit reservation services.</p>
     <a href="{{ route('reservation-services.index') }}" class="btn btn-secondary">Back</a>
-    @endif
-    @endauth
+    @endcan
 </div>
 @endsection

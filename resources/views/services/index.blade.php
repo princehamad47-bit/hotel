@@ -4,11 +4,9 @@
 <h1 class="page-title">Services</h1>
 
 <div class="card">
-    @auth
-    @if (auth()->user()->canManageHousekeeping())
+    @can('module-access', ['services', 'create'])
     <a href="{{ route('services.create') }}" class="btn btn-primary">+ Add Service</a>
-    @endif
-    @endauth
+    @endcan
 </div>
 
 <div class="card table-responsive">
@@ -30,21 +28,25 @@
                 <td>{{ number_format($service->price, 2) }}</td>
                 <td>{{ $service->is_active ? 'Yes' : 'No' }}</td>
                 <td>
-                    <a href="{{ route('services.show', $service) }}" class="btn btn-success">View</a>
+                    <div class="action-buttons">
+                        @can('module-access', ['services', 'read'])
+                        <a href="{{ route('services.show', $service) }}" class="btn btn-success">View</a>
+                        @endcan
 
-                    @auth
-                    @if (auth()->user()->canManageHousekeeping())
-                    <a href="{{ route('services.edit', $service) }}" class="btn btn-warning">Edit</a>
+                        @can('module-access', ['services', 'update'])
+                        <a href="{{ route('services.edit', $service) }}" class="btn btn-warning">Edit</a>
+                        @endcan
 
-                    <form action="{{ route('services.destroy', $service) }}" method="POST" class="inline-form">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this service?')">
-                            Delete
-                        </button>
-                    </form>
-                    @endif
-                    @endauth
+                        @can('module-access', ['services', 'delete'])
+                        <form action="{{ route('services.destroy', $service) }}" method="POST" class="inline-form">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this service?')">
+                                Delete
+                            </button>
+                        </form>
+                        @endcan
+                    </div>
                 </td>
             </tr>
             @empty

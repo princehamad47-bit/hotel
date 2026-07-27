@@ -122,7 +122,7 @@
                     <th>Check In</th>
                     <th>Check Out</th>
                     <th>Status</th>
-                    <th>Total Amount</th>
+                    <th>Grand Total</th>
                     <th>Paid Amount</th>
                     <th>Created At</th>
                 </tr>
@@ -130,7 +130,15 @@
             <tbody>
                 @forelse ($reservations as $reservation)
                 <tr>
-                    <td>{{ $reservation->reservation_code }}</td>
+                    <td>
+                        @can('module-access', ['reservations', 'read'])
+                        <a href="{{ route('reservations.show', $reservation) }}">
+                            {{ $reservation->reservation_code }}
+                        </a>
+                        @else
+                        {{ $reservation->reservation_code }}
+                        @endcan
+                    </td>
                     <td>{{ $reservation->guest->first_name }} {{ $reservation->guest->last_name }}</td>
                     <td>{{ $reservation->check_in_date->format('Y-m-d') }}</td>
                     <td>{{ $reservation->check_out_date->format('Y-m-d') }}</td>
@@ -139,7 +147,7 @@
                             {{ str_replace('_', ' ', ucfirst($reservation->status)) }}
                         </span>
                     </td>
-                    <td>{{ number_format($reservation->total_amount, 2) }}</td>
+                    <td>{{ number_format($reservation->grand_total, 2) }}</td>
                     <td>{{ number_format($reservation->paid_amount, 2) }}</td>
                     <td>{{ $reservation->created_at->format('Y-m-d H:i') }}</td>
                 </tr>

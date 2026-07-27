@@ -4,8 +4,7 @@
 <h1 class="page-title">Add Staff</h1>
 
 <div class="card">
-    @auth
-    @if (auth()->user()->isAdmin())
+    @can('module-access', ['staff', 'create'])
     <form method="POST" action="{{ route('staff.store') }}">
         @csrf
 
@@ -83,7 +82,6 @@
     @else
     <p class="muted">You do not have permission to create staff.</p>
     <a href="{{ route('staff.index') }}" class="btn btn-secondary">Back</a>
-    @endif
-    @endauth
+    @endcan
 </div>
 @endsection

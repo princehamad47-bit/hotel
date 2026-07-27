@@ -18,6 +18,7 @@
     </div>
 </div>
 
+@can('module-access', ['reservation-services', 'read'])
 <div class="card">
     <h3 class="section-title">Recent Usage</h3>
 
@@ -50,12 +51,11 @@
     <p>No usage found for this service.</p>
     @endif
 </div>
+@endcan
 
 <a href="{{ route('services.index') }}" class="btn btn-secondary">Back</a>
 
-@auth
-@if (auth()->user()->canManageHousekeeping())
+@can('module-access', ['services', 'update'])
 <a href="{{ route('services.edit', $service) }}" class="btn btn-warning">Edit</a>
-@endif
-@endauth
+@endcan
 @endsection

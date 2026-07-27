@@ -21,6 +21,7 @@
     </div>
 </div>
 
+@can('module-access', ['reservations', 'read'])
 <div class="card">
     <h3 class="section-title">Reservations</h3>
 
@@ -39,11 +40,19 @@
             <tbody>
                 @foreach ($guest->reservations as $reservation)
                 <tr>
-                    <td>{{ $reservation->reservation_code }}</td>
-                    <td>{{ $reservation->check_in_date }}</td>
-                    <td>{{ $reservation->check_out_date }}</td>
-                    <td>{{ $reservation->status }}</td>
-                    <td>{{ number_format($reservation->total_amount, 2) }}</td>
+                    <td>
+                        <a href="{{ route('reservations.show', $reservation) }}">
+                            {{ $reservation->reservation_code }}
+                        </a>
+                    </td>
+                    <td>{{ $reservation->check_in_date->format('Y-m-d') }}</td>
+                    <td>{{ $reservation->check_out_date->format('Y-m-d') }}</td>
+                    <td>
+                        <span class="badge badge-{{ $reservation->status }}">
+                            {{ ucwords(str_replace('_', ' ', $reservation->status)) }}
+                        </span>
+                    </td>
+                    <td>{{ number_format($reservation->grand_total, 2) }}</td>
                 </tr>
                 @endforeach
             </tbody>
@@ -53,12 +62,11 @@
     <p>No reservations found for this guest.</p>
     @endif
 </div>
+@endcan
 
 <a href="{{ route('guests.index') }}" class="btn btn-secondary">Back</a>
 
-@auth
-@if (auth()->user()->canManageFrontDesk())
+@can('module-access', ['guests', 'update'])
 <a href="{{ route('guests.edit', $guest) }}" class="btn btn-warning">Edit</a>
-@endif
-@endauth
+@endcan
 @endsection

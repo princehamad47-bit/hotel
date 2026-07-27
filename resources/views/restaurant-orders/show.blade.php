@@ -47,11 +47,9 @@ $isFullyPaid = $remainingAmount <= 0;
         <p><span class="badge badge-cancelled">Balance Due</span></p>
         <p><strong>Outstanding Balance:</strong> {{ number_format($remainingAmount, 2) }}</p>
 
-        @auth
-        @if (auth()->user()->canManageFrontDesk())
+        @can('module-access', ['restaurant-orders', 'create'])
         <a href="{{ route('restaurant-payments.create', $restaurantOrder) }}" class="btn btn-primary">Add Payment</a>
-        @endif
-        @endauth
+        @endcan
         @endif
     </div>
 
@@ -94,11 +92,9 @@ $isFullyPaid = $remainingAmount <= 0;
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; gap:12px; flex-wrap:wrap;">
             <h3 class="section-title" style="margin-bottom:0;">Taxes</h3>
 
-            @auth
-            @if (auth()->user()->canManageFrontDesk())
+            @can('module-access', ['restaurant-orders', 'create'])
             <a href="{{ route('restaurant-order-taxes.create', $restaurantOrder) }}" class="btn btn-primary">+ Apply Tax</a>
-            @endif
-            @endauth
+            @endcan
         </div>
 
         @if ($restaurantOrder->taxes->count())
@@ -127,8 +123,7 @@ $isFullyPaid = $remainingAmount <= 0;
                         </td>
                         <td>{{ number_format($restaurantTax->tax_amount, 2) }}</td>
                         <td>
-                            @auth
-                            @if (auth()->user()->canManageFrontDesk())
+                            @can('module-access', ['restaurant-orders', 'delete'])
                             <form action="{{ route('restaurant-order-taxes.destroy', [$restaurantOrder, $restaurantTax->id]) }}" method="POST" class="inline-form">
                                 @csrf
                                 @method('DELETE')
@@ -136,8 +131,7 @@ $isFullyPaid = $remainingAmount <= 0;
                                     Remove
                                 </button>
                             </form>
-                            @endif
-                            @endauth
+                            @endcan
                         </td>
                     </tr>
                     @endforeach
@@ -162,11 +156,9 @@ $isFullyPaid = $remainingAmount <= 0;
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; gap:12px; flex-wrap:wrap;">
             <h3 class="section-title" style="margin-bottom:0;">Payments</h3>
 
-            @auth
-            @if (auth()->user()->canManageFrontDesk())
+            @can('module-access', ['restaurant-orders', 'create'])
             <a href="{{ route('restaurant-payments.create', $restaurantOrder) }}" class="btn btn-primary">+ Add Payment</a>
-            @endif
-            @endauth
+            @endcan
         </div>
 
         @if ($restaurantOrder->payments->count())
@@ -203,10 +195,11 @@ $isFullyPaid = $remainingAmount <= 0;
 
     <a href="{{ route('restaurant-orders.index') }}" class="btn btn-secondary">Back</a>
 
-    @auth
-    @if (auth()->user()->canManageFrontDesk())
+    @can('module-access', ['restaurant-orders', 'update'])
     <a href="{{ route('restaurant-orders.edit', $restaurantOrder) }}" class="btn btn-warning">Edit</a>
+    @endcan
+
+    @can('module-access', ['restaurant-orders', 'read'])
     <a href="{{ route('restaurant-orders.invoice', $restaurantOrder) }}" class="btn btn-primary" target="_blank">Print Invoice</a>
-    @endif
-    @endauth
+    @endcan
     @endsection

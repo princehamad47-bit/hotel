@@ -18,5 +18,8 @@
 </div>
 
 <a href="{{ route('menu-items.index') }}" class="btn btn-secondary">Back</a>
+
+@can('module-access', ['menu-items', 'update'])
 <a href="{{ route('menu-items.edit', $menuItem) }}" class="btn btn-warning">Edit</a>
+@endcan
 @endsection

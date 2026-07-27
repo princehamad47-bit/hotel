@@ -4,11 +4,9 @@
 <h1 class="page-title">Guests</h1>
 
 <div class="card">
-    @auth
-    @if (auth()->user()->canManageFrontDesk())
+    @can('module-access', ['guests', 'create'])
     <a href="{{ route('guests.create') }}" class="btn btn-primary">+ Add Guest</a>
-    @endif
-    @endauth
+    @endcan
 </div>
 
 <div class="card table-responsive">
@@ -34,23 +32,25 @@
                 <td>{{ $guest->id_number ?? '-' }}</td>
                 <td>{{ $guest->nationality ?? '-' }}</td>
                 <td>
-                    <a href="{{ route('guests.show', $guest) }}" class="btn btn-success">View</a>
+                    <div class="action-buttons">
+                        @can('module-access', ['guests', 'read'])
+                        <a href="{{ route('guests.show', $guest) }}" class="btn btn-success">View</a>
+                        @endcan
 
-                    @auth
-                    @if (auth()->user()->isAdmin())
-                    <a href="{{ route('guests.edit', $guest) }}" class="btn btn-warning">Edit</a>
-                    @endif
+                        @can('module-access', ['guests', 'update'])
+                        <a href="{{ route('guests.edit', $guest) }}" class="btn btn-warning">Edit</a>
+                        @endcan
 
-                    @if (auth()->user()->isAdmin())
-                    <form action="{{ route('guests.destroy', $guest) }}" method="POST" class="inline-form">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this guest?')">
-                            Delete
-                        </button>
-                    </form>
-                    @endif
-                    @endauth
+                        @can('module-access', ['guests', 'delete'])
+                        <form action="{{ route('guests.destroy', $guest) }}" method="POST" class="inline-form">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this guest?')">
+                                Delete
+                            </button>
+                        </form>
+                        @endcan
+                    </div>
                 </td>
             </tr>
             @empty

@@ -4,11 +4,9 @@
 <h1 class="page-title">Menu Categories</h1>
 
 <div class="card">
-    @auth
-    @if (auth()->user()->isAdmin())
+    @can('module-access', ['menu-categories', 'create'])
     <a href="{{ route('menu-categories.create') }}" class="btn btn-primary">+ Add Menu Category</a>
-    @endif
-    @endauth
+    @endcan
 </div>
 
 <div class="card table-responsive">
@@ -30,21 +28,25 @@
                 <td>{{ $menuCategory->is_active ? 'Yes' : 'No' }}</td>
                 <td>{{ $menuCategory->menuItems()->count() }}</td>
                 <td>
-                    <a href="{{ route('menu-categories.show', $menuCategory) }}" class="btn btn-success">View</a>
+                    <div class="action-buttons">
+                        @can('module-access', ['menu-categories', 'read'])
+                        <a href="{{ route('menu-categories.show', $menuCategory) }}" class="btn btn-success">View</a>
+                        @endcan
 
-                    @auth
-                    @if (auth()->user()->isAdmin())
-                    <a href="{{ route('menu-categories.edit', $menuCategory) }}" class="btn btn-warning">Edit</a>
+                        @can('module-access', ['menu-categories', 'update'])
+                        <a href="{{ route('menu-categories.edit', $menuCategory) }}" class="btn btn-warning">Edit</a>
+                        @endcan
 
-                    <form action="{{ route('menu-categories.destroy', $menuCategory) }}" method="POST" class="inline-form">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this menu category?')">
-                            Delete
-                        </button>
-                    </form>
-                    @endif
-                    @endauth
+                        @can('module-access', ['menu-categories', 'delete'])
+                        <form action="{{ route('menu-categories.destroy', $menuCategory) }}" method="POST" class="inline-form">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this menu category?')">
+                                Delete
+                            </button>
+                        </form>
+                        @endcan
+                    </div>
                 </td>
             </tr>
             @empty

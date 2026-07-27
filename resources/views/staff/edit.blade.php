@@ -4,8 +4,7 @@
 <h1 class="page-title">Edit Staff</h1>
 
 <div class="card">
-    @auth
-    @if (auth()->user()->isAdmin())
+    @can('module-access', ['staff', 'update'])
     <form method="POST" action="{{ route('staff.update', $staff) }}">
         @csrf
         @method('PUT')
@@ -84,7 +83,6 @@
     @else
     <p class="muted">You do not have permission to edit staff.</p>
     <a href="{{ route('staff.index') }}" class="btn btn-secondary">Back</a>
-    @endif
-    @endauth
+    @endcan
 </div>
 @endsection

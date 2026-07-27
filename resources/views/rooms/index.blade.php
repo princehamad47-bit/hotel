@@ -4,11 +4,9 @@
 <h1 class="page-title">Rooms</h1>
 
 <div class="card">
-    @auth
-    @if (auth()->user()->canManageHousekeeping())
+    @can('module-access', ['rooms', 'create'])
     <a href="{{ route('rooms.create') }}" class="btn btn-primary">+ Add Room</a>
-    @endif
-    @endauth
+    @endcan
 </div>
 
 <div class="card table-responsive">
@@ -38,21 +36,25 @@
                 <td>{{ number_format($room->roomType->base_price, 2) }}</td>
                 <td>{{ $room->roomType->capacity }}</td>
                 <td>
-                    <a href="{{ route('rooms.show', $room) }}" class="btn btn-success">View</a>
+                    <div class="action-buttons">
+                        @can('module-access', ['rooms', 'read'])
+                        <a href="{{ route('rooms.show', $room) }}" class="btn btn-success">View</a>
+                        @endcan
 
-                    @auth
-                    @if (auth()->user()->isAdmin())
-                    <a href="{{ route('rooms.edit', $room) }}" class="btn btn-warning">Edit</a>
+                        @can('module-access', ['rooms', 'update'])
+                        <a href="{{ route('rooms.edit', $room) }}" class="btn btn-warning">Edit</a>
+                        @endcan
 
-                    <form action="{{ route('rooms.destroy', $room) }}" method="POST" class="inline-form">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this room?')">
-                            Delete
-                        </button>
-                    </form>
-                    @endif
-                    @endauth
+                        @can('module-access', ['rooms', 'delete'])
+                        <form action="{{ route('rooms.destroy', $room) }}" method="POST" class="inline-form">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this room?')">
+                                Delete
+                            </button>
+                        </form>
+                        @endcan
+                    </div>
                 </td>
             </tr>
             @empty

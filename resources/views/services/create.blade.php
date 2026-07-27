@@ -4,8 +4,7 @@
 <h1 class="page-title">Add Service</h1>
 
 <div class="card">
-    @auth
-    @if (auth()->user()->canManageHousekeeping())
+    @can('module-access', ['services', 'create'])
     <form method="POST" action="{{ route('services.store') }}">
         @csrf
 
@@ -54,7 +53,6 @@
     @else
     <p class="muted">You do not have permission to create services.</p>
     <a href="{{ route('services.index') }}" class="btn btn-secondary">Back</a>
-    @endif
-    @endauth
+    @endcan
 </div>
 @endsection

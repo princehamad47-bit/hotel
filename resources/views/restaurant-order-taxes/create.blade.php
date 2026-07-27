@@ -10,6 +10,7 @@
 </div>
 
 <div class="card">
+    @can('module-access', ['restaurant-orders', 'create'])
     <form method="POST" action="{{ route('restaurant-order-taxes.store', $restaurantOrder) }}">
         @csrf
 
@@ -38,5 +39,12 @@
         <button type="submit" class="btn btn-success">Apply Tax</button>
         <a href="{{ route('restaurant-orders.show', $restaurantOrder) }}" class="btn btn-secondary">Back</a>
     </form>
+    @else
+    <p class="muted">You do not have permission to apply restaurant taxes.</p>
+
+    @can('module-access', ['restaurant-orders', 'read'])
+    <a href="{{ route('restaurant-orders.show', $restaurantOrder) }}" class="btn btn-secondary">Back</a>
+    @endcan
+    @endcan
 </div>
 @endsection

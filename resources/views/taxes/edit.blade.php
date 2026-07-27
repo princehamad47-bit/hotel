@@ -4,8 +4,7 @@
 <h1 class="page-title">Edit Tax</h1>
 
 <div class="card">
-    @auth
-    @if (auth()->user()->isAdmin())
+    @can('module-access', ['taxes', 'update'])
     <form method="POST" action="{{ route('taxes.update', $tax) }}">
         @csrf
         @method('PUT')
@@ -50,7 +49,6 @@
     @else
     <p class="muted">You do not have permission to edit taxes.</p>
     <a href="{{ route('taxes.index') }}" class="btn btn-secondary">Back</a>
-    @endif
-    @endauth
+    @endcan
 </div>
 @endsection

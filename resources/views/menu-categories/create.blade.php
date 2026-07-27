@@ -4,6 +4,7 @@
 <h1 class="page-title">Add Menu Category</h1>
 
 <div class="card">
+    @can('module-access', ['menu-categories', 'create'])
     <form method="POST" action="{{ route('menu-categories.store') }}">
         @csrf
 
@@ -29,5 +30,12 @@
         <button type="submit" class="btn btn-success">Save Menu Category</button>
         <a href="{{ route('menu-categories.index') }}" class="btn btn-secondary">Back</a>
     </form>
+    @else
+    <p class="muted">You do not have permission to create menu categories.</p>
+
+    @can('module-access', ['menu-categories', 'read'])
+    <a href="{{ route('menu-categories.index') }}" class="btn btn-secondary">Back</a>
+    @endcan
+    @endcan
 </div>
 @endsection

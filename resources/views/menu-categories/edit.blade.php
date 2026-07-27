@@ -4,6 +4,7 @@
 <h1 class="page-title">Edit Menu Category</h1>
 
 <div class="card">
+    @can('module-access', ['menu-categories', 'update'])
     <form method="POST" action="{{ route('menu-categories.update', $menuCategory) }}">
         @csrf
         @method('PUT')
@@ -30,5 +31,12 @@
         <button type="submit" class="btn btn-success">Update Menu Category</button>
         <a href="{{ route('menu-categories.index') }}" class="btn btn-secondary">Back</a>
     </form>
+    @else
+    <p class="muted">You do not have permission to edit menu categories.</p>
+
+    @can('module-access', ['menu-categories', 'read'])
+    <a href="{{ route('menu-categories.index') }}" class="btn btn-secondary">Back</a>
+    @endcan
+    @endcan
 </div>
 @endsection

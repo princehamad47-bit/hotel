@@ -18,6 +18,7 @@
     </div>
 </div>
 
+@can('module-access', ['rooms', 'read'])
 <div class="card">
     <h3 class="section-title">Rooms</h3>
 
@@ -34,9 +35,17 @@
             <tbody>
                 @foreach ($roomType->rooms as $room)
                 <tr>
-                    <td>{{ $room->room_number }}</td>
+                    <td>
+                        <a href="{{ route('rooms.show', $room) }}">
+                            {{ $room->room_number }}
+                        </a>
+                    </td>
                     <td>{{ $room->floor_number ?? '-' }}</td>
-                    <td>{{ ucfirst($room->status) }}</td>
+                    <td>
+                        <span class="badge badge-{{ $room->status }}">
+                            {{ ucfirst($room->status) }}
+                        </span>
+                    </td>
                 </tr>
                 @endforeach
             </tbody>
@@ -46,12 +55,11 @@
     <p>No rooms found for this room type.</p>
     @endif
 </div>
+@endcan
 
 <a href="{{ route('room-types.index') }}" class="btn btn-secondary">Back</a>
 
-@auth
-@if (auth()->user()->isAdmin())
+@can('module-access', ['room-types', 'update'])
 <a href="{{ route('room-types.edit', $roomType) }}" class="btn btn-warning">Edit</a>
-@endif
-@endauth
+@endcan
 @endsection

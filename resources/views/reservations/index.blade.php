@@ -45,7 +45,7 @@
         <button type="submit" class="btn btn-primary">Search</button>
         <a href="{{ route('reservations.index') }}" class="btn btn-secondary">Reset</a>
 
-        @can('module-access',['orders','create'])
+        @can('module-access', ['reservations', 'create'])
         <a href="{{ route('reservations.create') }}" class="btn btn-success">+ Create Reservation</a>
         @endcan
     </form>
@@ -91,7 +91,9 @@
                 <td>{{ number_format($remainingAmount, 2) }}</td>
                 <td>
                     <div class="action-buttons">
+                        @can('module-access', ['reservations', 'read'])
                         <a href="{{ route('reservations.show', $reservation) }}" class="btn btn-success">View</a>
+                        @endcan
                         
                         @can('module-access', ['reservations', 'update'])
                         <a href="{{ route('reservations.edit', $reservation) }}" class="btn btn-warning">Edit</a>

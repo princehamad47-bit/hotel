@@ -34,6 +34,7 @@ $isOverpaid = $restaurantOrder->paid_amount > $restaurantOrder->grand_total;
 </div>
 
 <div class="card">
+    @can('module-access', ['restaurant-orders', 'create'])
     @if ($remainingAmount > 0)
     <form method="POST" action="{{ route('restaurant-payments.store', $restaurantOrder) }}">
         @csrf
@@ -104,5 +105,12 @@ $isOverpaid = $restaurantOrder->paid_amount > $restaurantOrder->grand_total;
 
     <a href="{{ route('restaurant-orders.show', $restaurantOrder) }}" class="btn btn-secondary">Back</a>
     @endif
+    @else
+    <p class="muted">You do not have permission to add restaurant payments.</p>
+
+    @can('module-access', ['restaurant-orders', 'read'])
+    <a href="{{ route('restaurant-orders.show', $restaurantOrder) }}" class="btn btn-secondary">Back</a>
+    @endcan
+    @endcan
 </div>
 @endsection

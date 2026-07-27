@@ -4,11 +4,9 @@
 <h1 class="page-title">Room Types</h1>
 
 <div class="card">
-    @auth
-    @if (auth()->user()->isAdmin())
+    @can('module-access', ['room-types', 'create'])
     <a href="{{ route('room-types.create') }}" class="btn btn-primary">+ Add Room Type</a>
-    @endif
-    @endauth
+    @endcan
 </div>
 
 <div class="card table-responsive">
@@ -34,21 +32,25 @@
                 <td>{{ $roomType->bed_type ?? '-' }}</td>
                 <td>{{ $roomType->rooms_count }}</td>
                 <td>
-                    <a href="{{ route('room-types.show', $roomType) }}" class="btn btn-success">View</a>
+                    <div class="action-buttons">
+                        @can('module-access', ['room-types', 'read'])
+                        <a href="{{ route('room-types.show', $roomType) }}" class="btn btn-success">View</a>
+                        @endcan
 
-                    @auth
-                    @if (auth()->user()->isAdmin())
-                    <a href="{{ route('room-types.edit', $roomType) }}" class="btn btn-warning">Edit</a>
+                        @can('module-access', ['room-types', 'update'])
+                        <a href="{{ route('room-types.edit', $roomType) }}" class="btn btn-warning">Edit</a>
+                        @endcan
 
-                    <form action="{{ route('room-types.destroy', $roomType) }}" method="POST" class="inline-form">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this room type?')">
-                            Delete
-                        </button>
-                    </form>
-                    @endif
-                    @endauth
+                        @can('module-access', ['room-types', 'delete'])
+                        <form action="{{ route('room-types.destroy', $roomType) }}" method="POST" class="inline-form">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this room type?')">
+                                Delete
+                            </button>
+                        </form>
+                        @endcan
+                    </div>
                 </td>
             </tr>
             @empty

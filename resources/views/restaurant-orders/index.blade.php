@@ -4,11 +4,9 @@
 <h1 class="page-title">Restaurant Orders</h1>
 
 <div class="card">
-    @auth
-    @if (auth()->user()->canManageFrontDesk())
+    @can('module-access', ['restaurant-orders', 'create'])
     <a href="{{ route('restaurant-orders.create') }}" class="btn btn-primary">+ Add Restaurant Order</a>
-    @endif
-    @endauth
+    @endcan
 </div>
 
 <div class="card table-responsive">
@@ -44,23 +42,25 @@
                 <td>{{ number_format($restaurantOrder->grand_total, 2) }}</td>
                 <td>{{ number_format($restaurantOrder->paid_amount, 2) }}</td>
                 <td>
-                    <a href="{{ route('restaurant-orders.show', $restaurantOrder) }}" class="btn btn-success">View</a>
+                    <div class="action-buttons">
+                        @can('module-access', ['restaurant-orders', 'read'])
+                        <a href="{{ route('restaurant-orders.show', $restaurantOrder) }}" class="btn btn-success">View</a>
+                        @endcan
 
-                    @auth
-                    @if (auth()->user()->canManageFrontDesk())
-                    <a href="{{ route('restaurant-orders.edit', $restaurantOrder) }}" class="btn btn-warning">Edit</a>
-                    @endif
+                        @can('module-access', ['restaurant-orders', 'update'])
+                        <a href="{{ route('restaurant-orders.edit', $restaurantOrder) }}" class="btn btn-warning">Edit</a>
+                        @endcan
 
-                    @if (auth()->user()->isAdmin())
-                    <form action="{{ route('restaurant-orders.destroy', $restaurantOrder) }}" method="POST" class="inline-form">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this restaurant order?')">
-                            Delete
-                        </button>
-                    </form>
-                    @endif
-                    @endauth
+                        @can('module-access', ['restaurant-orders', 'delete'])
+                        <form action="{{ route('restaurant-orders.destroy', $restaurantOrder) }}" method="POST" class="inline-form">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this restaurant order?')">
+                                Delete
+                            </button>
+                        </form>
+                        @endcan
+                    </div>
                 </td>
             </tr>
             @empty

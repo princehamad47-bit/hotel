@@ -4,8 +4,7 @@
 <h1 class="page-title">Edit Room</h1>
 
 <div class="card">
-    @auth
-    @if (auth()->user()->canManageHousekeeping())
+    @can('module-access', ['rooms', 'update'])
     <form method="POST" action="{{ route('rooms.update', $room) }}">
         @csrf
         @method('PUT')
@@ -56,7 +55,6 @@
     @else
     <p class="muted">You do not have permission to edit rooms.</p>
     <a href="{{ route('rooms.index') }}" class="btn btn-secondary">Back</a>
-    @endif
-    @endauth
+    @endcan
 </div>
 @endsection

@@ -4,8 +4,7 @@
 <h1 class="page-title">Add Guest</h1>
 
 <div class="card">
-    @auth
-    @if (auth()->user()->canManageFrontDesk())
+    @can('module-access', ['guests', 'create'])
     <form method="POST" action="{{ route('guests.store') }}">
         @csrf
 
@@ -63,7 +62,6 @@
     @else
     <p class="muted">You do not have permission to create guests.</p>
     <a href="{{ route('guests.index') }}" class="btn btn-secondary">Back</a>
-    @endif
-    @endauth
+    @endcan
 </div>
 @endsection

@@ -4,8 +4,7 @@
 <h1 class="page-title">Edit Room Type</h1>
 
 <div class="card">
-    @auth
-    @if (auth()->user()->isAdmin())
+    @can('module-access', ['room-types', 'update'])
     <form method="POST" action="{{ route('room-types.update', $roomType) }}">
         @csrf
         @method('PUT')
@@ -59,7 +58,6 @@
     @else
     <p class="muted">You do not have permission to edit room types.</p>
     <a href="{{ route('room-types.index') }}" class="btn btn-secondary">Back</a>
-    @endif
-    @endauth
+    @endcan
 </div>
 @endsection

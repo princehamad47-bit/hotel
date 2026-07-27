@@ -64,19 +64,16 @@ $isFullyPaid = $remainingAmount <= 0;
         <p><span class="badge badge-cancelled">Balance Due</span></p>
         <p><strong>Outstanding Balance:</strong> {{ number_format($remainingAmount, 2) }}</p>
 
-        @auth
-        @if (auth()->user()->canManageFrontDesk())
+        @can('module-access', ['reservations', 'create'])
         <a href="{{ route('payments.create', $reservation) }}" class="btn btn-primary">Add Payment</a>
-        @endif
-        @endauth
+        @endcan
         @endif
     </div>
 
     <div class="card">
         <h3 class="section-title">Reservation Actions</h3>
 
-        @auth
-        @if (auth()->user()->canManageFrontDesk())
+        @can('module-access', ['reservations', 'update'])
         @if ($reservation->status === 'confirmed')
         <form action="{{ route('reservations.check-in', $reservation) }}" method="POST" class="inline-form">
             @csrf
@@ -101,9 +98,11 @@ $isFullyPaid = $remainingAmount <= 0;
         @endif
 
         <a href="{{ route('reservations.edit', $reservation) }}" class="btn btn-secondary">Edit Reservation</a>
+        @endcan
+
+        @can('module-access', ['reservations', 'read'])
         <a href="{{ route('reservations.invoice', $reservation) }}" class="btn btn-primary" target="_blank">Print Invoice</a>
-        @endif
-        @endauth
+        @endcan
     </div>
 
     <div class="card">
@@ -125,11 +124,9 @@ $isFullyPaid = $remainingAmount <= 0;
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; gap:12px; flex-wrap:wrap;">
             <h3 class="section-title" style="margin-bottom:0;">Taxes</h3>
 
-            @auth
-            @if (auth()->user()->canManageFrontDesk())
+            @can('module-access', ['reservations', 'create'])
             <a href="{{ route('reservation-taxes.create', $reservation) }}" class="btn btn-primary">+ Apply Tax</a>
-            @endif
-            @endauth
+            @endcan
         </div>
 
         @if ($reservation->taxes->count())
@@ -158,8 +155,7 @@ $isFullyPaid = $remainingAmount <= 0;
                         </td>
                         <td>{{ number_format($reservationTax->tax_amount, 2) }}</td>
                         <td>
-                            @auth
-                            @if (auth()->user()->canManageFrontDesk())
+                            @can('module-access', ['reservations', 'delete'])
                             <form action="{{ route('reservation-taxes.destroy', [$reservation, $reservationTax->id]) }}" method="POST" class="inline-form">
                                 @csrf
                                 @method('DELETE')
@@ -167,8 +163,7 @@ $isFullyPaid = $remainingAmount <= 0;
                                     Remove
                                 </button>
                             </form>
-                            @endif
-                            @endauth
+                            @endcan
                         </td>
                     </tr>
                     @endforeach
@@ -184,11 +179,9 @@ $isFullyPaid = $remainingAmount <= 0;
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; gap:12px; flex-wrap:wrap;">
             <h3 class="section-title" style="margin-bottom:0;">Restaurant Orders</h3>
 
-            @auth
-            @if (auth()->user()->canManageFrontDesk())
+            @can('module-access', ['restaurant-orders', 'create'])
             <a href="{{ route('restaurant-orders.create', ['reservation_id' => $reservation->id]) }}" class="btn btn-primary">+ Add Restaurant Order</a>
-            @endif
-            @endauth
+            @endcan
         </div>
 
         @if ($reservation->restaurantOrders->where('status', '!=', 'cancelled')->count())
@@ -215,13 +208,13 @@ $isFullyPaid = $remainingAmount <= 0;
                         <td>{{ $restaurantOrder->items->count() }}</td>
                         <td>{{ number_format($restaurantOrder->grand_total, 2) }}</td>
                         <td>
+                            @can('module-access', ['restaurant-orders', 'read'])
                             <a href="{{ route('restaurant-orders.show', $restaurantOrder) }}" class="btn btn-success">View</a>
+                            @endcan
 
-                            @auth
-                            @if (auth()->user()->canManageFrontDesk())
+                            @can('module-access', ['restaurant-orders', 'update'])
                             <a href="{{ route('restaurant-orders.edit', $restaurantOrder) }}" class="btn btn-warning">Edit</a>
-                            @endif
-                            @endauth
+                            @endcan
                         </td>
                     </tr>
                     @endforeach
@@ -231,11 +224,9 @@ $isFullyPaid = $remainingAmount <= 0;
         @else
         <p>No restaurant orders added yet.</p>
 
-        @auth
-        @if (auth()->user()->canManageFrontDesk())
+        @can('module-access', ['restaurant-orders', 'create'])
         <a href="{{ route('restaurant-orders.create', ['reservation_id' => $reservation->id]) }}" class="btn btn-primary">Add Restaurant Order</a>
-        @endif
-        @endauth
+        @endcan
         @endif
     </div>
 
@@ -243,11 +234,9 @@ $isFullyPaid = $remainingAmount <= 0;
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; gap:12px; flex-wrap:wrap;">
             <h3 class="section-title" style="margin-bottom:0;">Payments</h3>
 
-            @auth
-            @if (auth()->user()->canManageFrontDesk())
+            @can('module-access', ['reservations', 'create'])
             <a href="{{ route('payments.create', $reservation) }}" class="btn btn-primary">+ Add Payment</a>
-            @endif
-            @endauth
+            @endcan
         </div>
 
         @if ($reservation->payments->count())
@@ -280,11 +269,9 @@ $isFullyPaid = $remainingAmount <= 0;
         @else
         <p>No payments yet.</p>
 
-        @auth
-        @if (auth()->user()->canManageFrontDesk())
+        @can('module-access', ['reservations', 'create'])
         <a href="{{ route('payments.create', $reservation) }}" class="btn btn-primary">Add First Payment</a>
-        @endif
-        @endauth
+        @endcan
         @endif
     </div>
 
@@ -292,11 +279,9 @@ $isFullyPaid = $remainingAmount <= 0;
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; gap:12px; flex-wrap:wrap;">
             <h3 class="section-title" style="margin-bottom:0;">Services</h3>
 
-            @auth
-            @if (auth()->user()->canManageHousekeeping())
+            @can('module-access', ['reservation-services', 'create'])
             <a href="{{ route('reservation-services.create', ['reservation_id' => $reservation->id]) }}" class="btn btn-primary">+ Add Service</a>
-            @endif
-            @endauth
+            @endcan
         </div>
 
         @if ($reservation->reservationServices->count())
@@ -335,9 +320,7 @@ $isFullyPaid = $remainingAmount <= 0;
 
     <a href="{{ route('reservations.index') }}" class="btn btn-secondary">Back</a>
 
-    @auth
-    @if (auth()->user()->canManageFrontDesk())
+    @can('module-access', ['reservations', 'update'])
     <a href="{{ route('reservations.edit', $reservation) }}" class="btn btn-warning">Edit</a>
-    @endif
-    @endauth
+    @endcan
     @endsection

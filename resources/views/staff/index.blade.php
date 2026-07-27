@@ -4,11 +4,9 @@
 <h1 class="page-title">Staff</h1>
 
 <div class="card">
-    @auth
-    @if (auth()->user()->isAdmin())
+    @can('module-access', ['staff', 'create'])
     <a href="{{ route('staff.create') }}" class="btn btn-primary">+ Add Staff</a>
-    @endif
-    @endauth
+    @endcan
 </div>
 
 <div class="card table-responsive">
@@ -36,21 +34,25 @@
                 <td>{{ $member->join_date ? $member->join_date->format('Y-m-d') : '-' }}</td>
                 <td>{{ ucfirst($member->status) }}</td>
                 <td>
-                    <a href="{{ route('staff.show', $member) }}" class="btn btn-success">View</a>
+                    <div class="action-buttons">
+                        @can('module-access', ['staff', 'read'])
+                        <a href="{{ route('staff.show', $member) }}" class="btn btn-success">View</a>
+                        @endcan
 
-                    @auth
-                    @if (auth()->user()->isAdmin())
-                    <a href="{{ route('staff.edit', $member) }}" class="btn btn-warning">Edit</a>
+                        @can('module-access', ['staff', 'update'])
+                        <a href="{{ route('staff.edit', $member) }}" class="btn btn-warning">Edit</a>
+                        @endcan
 
-                    <form action="{{ route('staff.destroy', $member) }}" method="POST" class="inline-form">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this staff member?')">
-                            Delete
-                        </button>
-                    </form>
-                    @endif
-                    @endauth
+                        @can('module-access', ['staff', 'delete'])
+                        <form action="{{ route('staff.destroy', $member) }}" method="POST" class="inline-form">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this staff member?')">
+                                Delete
+                            </button>
+                        </form>
+                        @endcan
+                    </div>
                 </td>
             </tr>
             @empty

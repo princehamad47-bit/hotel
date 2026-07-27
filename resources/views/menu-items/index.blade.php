@@ -4,11 +4,9 @@
 <h1 class="page-title">Menu Items</h1>
 
 <div class="card">
-    @auth
-    @if (auth()->user()->isAdmin())
+    @can('module-access', ['menu-items', 'create'])
     <a href="{{ route('menu-items.create') }}" class="btn btn-primary">+ Add Menu Item</a>
-    @endif
-    @endauth
+    @endcan
 </div>
 
 <div class="card table-responsive">
@@ -30,21 +28,25 @@
                 <td>{{ number_format($menuItem->price, 2) }}</td>
                 <td>{{ $menuItem->is_available ? 'Yes' : 'No' }}</td>
                 <td>
-                    <a href="{{ route('menu-items.show', $menuItem) }}" class="btn btn-success">View</a>
+                    <div class="action-buttons">
+                        @can('module-access', ['menu-items', 'read'])
+                        <a href="{{ route('menu-items.show', $menuItem) }}" class="btn btn-success">View</a>
+                        @endcan
 
-                    @auth
-                    @if (auth()->user()->isAdmin())
-                    <a href="{{ route('menu-items.edit', $menuItem) }}" class="btn btn-warning">Edit</a>
+                        @can('module-access', ['menu-items', 'update'])
+                        <a href="{{ route('menu-items.edit', $menuItem) }}" class="btn btn-warning">Edit</a>
+                        @endcan
 
-                    <form action="{{ route('menu-items.destroy', $menuItem) }}" method="POST" class="inline-form">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this menu item?')">
-                            Delete
-                        </button>
-                    </form>
-                    @endif
-                    @endauth
+                        @can('module-access', ['menu-items', 'delete'])
+                        <form action="{{ route('menu-items.destroy', $menuItem) }}" method="POST" class="inline-form">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this menu item?')">
+                                Delete
+                            </button>
+                        </form>
+                        @endcan
+                    </div>
                 </td>
             </tr>
             @empty

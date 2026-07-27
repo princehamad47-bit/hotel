@@ -4,11 +4,9 @@
 <h1 class="page-title">Reservation Services</h1>
 
 <div class="card">
-    @auth
-    @if (auth()->user()->canManageHousekeeping())
+    @can('module-access', ['reservation-services', 'create'])
     <a href="{{ route('reservation-services.create') }}" class="btn btn-primary">+ Add Reservation Service</a>
-    @endif
-    @endauth
+    @endcan
 </div>
 
 <div class="card table-responsive">
@@ -40,21 +38,25 @@
                 <td>{{ number_format($reservationService->total_price, 2) }}</td>
                 <td>{{ $reservationService->service_date ? $reservationService->service_date->format('Y-m-d H:i') : '-' }}</td>
                 <td>
-                    <a href="{{ route('reservation-services.show', $reservationService->id) }}" class="btn btn-success">View</a>
+                    <div class="action-buttons">
+                        @can('module-access', ['reservation-services', 'read'])
+                        <a href="{{ route('reservation-services.show', $reservationService->id) }}" class="btn btn-success">View</a>
+                        @endcan
 
-                    @auth
-                    @if (auth()->user()->canManageHousekeeping())
-                    <a href="{{ route('reservation-services.edit', $reservationService->id) }}" class="btn btn-warning">Edit</a>
+                        @can('module-access', ['reservation-services', 'update'])
+                        <a href="{{ route('reservation-services.edit', $reservationService->id) }}" class="btn btn-warning">Edit</a>
+                        @endcan
 
-                    <form action="{{ route('reservation-services.destroy', $reservationService->id) }}" method="POST" class="inline-form">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this reservation service?')">
-                            Delete
-                        </button>
-                    </form>
-                    @endif
-                    @endauth
+                        @can('module-access', ['reservation-services', 'delete'])
+                        <form action="{{ route('reservation-services.destroy', $reservationService->id) }}" method="POST" class="inline-form">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this reservation service?')">
+                                Delete
+                            </button>
+                        </form>
+                        @endcan
+                    </div>
                 </td>
             </tr>
             @empty

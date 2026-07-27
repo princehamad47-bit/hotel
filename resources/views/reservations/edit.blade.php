@@ -4,8 +4,7 @@
 <h1 class="page-title">Edit Reservation</h1>
 
 <div class="card">
-    @auth
-    @if (auth()->user()->canManageFrontDesk())
+    @can('module-access', ['reservations', 'update'])
     <form method="POST" action="{{ route('reservations.update', $reservation) }}">
         @csrf
         @method('PUT')
@@ -93,7 +92,6 @@
     @else
     <p class="muted">You do not have permission to edit reservations.</p>
     <a href="{{ route('reservations.index') }}" class="btn btn-secondary">Back</a>
-    @endif
-    @endauth
+    @endcan
 </div>
 @endsection

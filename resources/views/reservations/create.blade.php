@@ -4,8 +4,7 @@
 <h1 class="page-title">Create Reservation</h1>
 
 <div class="card">
-    @auth
-    @if (auth()->user()->canManageFrontDesk())
+    @can('module-access', ['reservations', 'create'])
     <h3 class="section-title">Step 1: Check Available Rooms</h3>
 
     <form method="GET" action="{{ route('reservations.create') }}">
@@ -27,12 +26,11 @@
     @else
     <p class="muted">You do not have permission to create reservations.</p>
     <a href="{{ route('reservations.index') }}" class="btn btn-secondary">Back</a>
-    @endif
-    @endauth
+    @endcan
 </div>
 
-@auth
-@if (auth()->user()->canManageFrontDesk() && request('check_in_date') && request('check_out_date'))
+@can('module-access', ['reservations', 'create'])
+@if (request('check_in_date') && request('check_out_date'))
 @php
 $checkedRooms = old('rooms', isset($selectedRoomId) && $selectedRoomId ? [$selectedRoomId] : []);
 $guestMode = old('guest_mode', 'new');
@@ -395,5 +393,5 @@ $guestMode = old('guest_mode', 'new');
     updateSelectedRoomsUI();
 </script>
 @endif
-@endauth
+@endcan
 @endsection

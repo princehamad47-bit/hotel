@@ -26,9 +26,7 @@
 
 <a href="{{ route('reservation-services.index') }}" class="btn btn-secondary">Back</a>
 
-@auth
-@if (auth()->user()->canManageHousekeeping())
+@can('module-access', ['reservation-services', 'update'])
 <a href="{{ route('reservation-services.edit', $reservationService->id) }}" class="btn btn-warning">Edit</a>
-@endif
-@endauth
+@endcan
 @endsection

@@ -24,6 +24,7 @@
     <p><strong>Address:</strong> {{ $staff->address ?? '-' }}</p>
 </div>
 
+@can('module-access', ['reservation-services', 'read'])
 <div class="card">
     <h3 class="section-title">Assigned Reservation Services</h3>
 
@@ -42,7 +43,15 @@
             <tbody>
                 @foreach ($staff->reservationServices as $item)
                 <tr>
-                    <td>{{ $item->reservation->reservation_code }}</td>
+                    <td>
+                        @can('module-access', ['reservations', 'read'])
+                        <a href="{{ route('reservations.show', $item->reservation) }}">
+                            {{ $item->reservation->reservation_code }}
+                        </a>
+                        @else
+                        {{ $item->reservation->reservation_code }}
+                        @endcan
+                    </td>
                     <td>{{ $item->reservation->guest->first_name }} {{ $item->reservation->guest->last_name }}</td>
                     <td>{{ $item->service->name ?? '-' }}</td>
                     <td>{{ ucfirst(str_replace('_', ' ', $item->status)) }}</td>
@@ -56,12 +65,11 @@
     <p>No assigned services found.</p>
     @endif
 </div>
+@endcan
 
 <a href="{{ route('staff.index') }}" class="btn btn-secondary">Back</a>
 
-@auth
-@if (auth()->user()->isAdmin())
+@can('module-access', ['staff', 'update'])
 <a href="{{ route('staff.edit', $staff) }}" class="btn btn-warning">Edit</a>
-@endif
-@endauth
+@endcan
 @endsection

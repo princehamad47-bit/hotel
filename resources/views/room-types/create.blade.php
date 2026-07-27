@@ -4,8 +4,7 @@
 <h1 class="page-title">Add Room Type</h1>
 
 <div class="card">
-    @auth
-    @if (auth()->user()->isAdmin())
+    @can('module-access', ['room-types', 'create'])
     <form method="POST" action="{{ route('room-types.store') }}">
         @csrf
 
@@ -58,7 +57,6 @@
     @else
     <p class="muted">You do not have permission to create room types.</p>
     <a href="{{ route('room-types.index') }}" class="btn btn-secondary">Back</a>
-    @endif
-    @endauth
+    @endcan
 </div>
 @endsection

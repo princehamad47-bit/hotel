@@ -4,11 +4,9 @@
 <h1 class="page-title">Taxes</h1>
 
 <div class="card">
-    @auth
-    @if (auth()->user()->isAdmin())
+    @can('module-access', ['taxes', 'create'])
     <a href="{{ route('taxes.create') }}" class="btn btn-primary">+ Add Tax</a>
-    @endif
-    @endauth
+    @endcan
 </div>
 
 <div class="card table-responsive">
@@ -42,21 +40,25 @@
                 </td>
                 <td>{{ $tax->reservationTaxes()->count() }}</td>
                 <td>
-                    <a href="{{ route('taxes.show', $tax) }}" class="btn btn-success">View</a>
+                    <div class="action-buttons">
+                        @can('module-access', ['taxes', 'read'])
+                        <a href="{{ route('taxes.show', $tax) }}" class="btn btn-success">View</a>
+                        @endcan
 
-                    @auth
-                    @if (auth()->user()->isAdmin())
-                    <a href="{{ route('taxes.edit', $tax) }}" class="btn btn-warning">Edit</a>
+                        @can('module-access', ['taxes', 'update'])
+                        <a href="{{ route('taxes.edit', $tax) }}" class="btn btn-warning">Edit</a>
+                        @endcan
 
-                    <form action="{{ route('taxes.destroy', $tax) }}" method="POST" class="inline-form">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this tax?')">
-                            Delete
-                        </button>
-                    </form>
-                    @endif
-                    @endauth
+                        @can('module-access', ['taxes', 'delete'])
+                        <form action="{{ route('taxes.destroy', $tax) }}" method="POST" class="inline-form">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this tax?')">
+                                Delete
+                            </button>
+                        </form>
+                        @endcan
+                    </div>
                 </td>
             </tr>
             @empty

@@ -2,11 +2,9 @@
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; gap:12px; flex-wrap:wrap;">
         <h3 class="section-title" style="margin-bottom:0;">Taxes</h3>
 
-        @auth
-        @if (auth()->user()->canManageFrontDesk())
+        @can('module-access', ['reservations', 'create'])
         <a href="{{ route('reservation-taxes.create', $reservation) }}" class="btn btn-primary">+ Apply Tax</a>
-        @endif
-        @endauth
+        @endcan
     </div>
 
     @if ($reservation->taxes->count())
@@ -35,8 +33,7 @@
                     </td>
                     <td>{{ number_format($reservationTax->tax_amount, 2) }}</td>
                     <td>
-                        @auth
-                        @if (auth()->user()->canManageFrontDesk())
+                        @can('module-access', ['reservations', 'delete'])
                         <form action="{{ route('reservation-taxes.destroy', [$reservation, $reservationTax->id]) }}" method="POST" class="inline-form">
                             @csrf
                             @method('DELETE')
@@ -44,8 +41,7 @@
                                 Remove
                             </button>
                         </form>
-                        @endif
-                        @endauth
+                        @endcan
                     </td>
                 </tr>
                 @endforeach

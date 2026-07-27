@@ -28,8 +28,7 @@
 <div class="card">
     <h3 class="section-title">Room Actions</h3>
 
-    @auth
-    @if (auth()->user()->canManageHousekeeping())
+    @can('module-access', ['rooms', 'update'])
     @if ($room->status === 'cleaning')
     <form action="{{ route('rooms.mark-available', $room) }}" method="POST" class="inline-form">
         @csrf
@@ -59,10 +58,10 @@
     @endif
     @else
     <p class="muted">You do not have permission to update room status.</p>
-    @endif
-    @endauth
+    @endcan
 </div>
 
+@can('module-access', ['reservations', 'read'])
 <div class="card">
     <h3 class="section-title">Reservation History</h3>
 
@@ -81,10 +80,18 @@
             <tbody>
                 @foreach ($room->reservationRooms as $reservationRoom)
                 <tr>
-                    <td>{{ $reservationRoom->reservation->reservation_code }}</td>
-                    <td>{{ $reservationRoom->reservation->check_in_date }}</td>
-                    <td>{{ $reservationRoom->reservation->check_out_date }}</td>
-                    <td>{{ $reservationRoom->reservation->status }}</td>
+                    <td>
+                        <a href="{{ route('reservations.show', $reservationRoom->reservation) }}">
+                            {{ $reservationRoom->reservation->reservation_code }}
+                        </a>
+                    </td>
+                    <td>{{ $reservationRoom->reservation->check_in_date->format('Y-m-d') }}</td>
+                    <td>{{ $reservationRoom->reservation->check_out_date->format('Y-m-d') }}</td>
+                    <td>
+                        <span class="badge badge-{{ $reservationRoom->reservation->status }}">
+                            {{ ucwords(str_replace('_', ' ', $reservationRoom->reservation->status)) }}
+                        </span>
+                    </td>
                     <td>{{ number_format($reservationRoom->room_rate, 2) }}</td>
                 </tr>
                 @endforeach
@@ -95,12 +102,11 @@
     <p>No reservation history found for this room.</p>
     @endif
 </div>
+@endcan
 
 <a href="{{ route('rooms.index') }}" class="btn btn-secondary">Back</a>
 
-@auth
-@if (auth()->user()->canManageHousekeeping())
+@can('module-access', ['rooms', 'update'])
 <a href="{{ route('rooms.edit', $room) }}" class="btn btn-warning">Edit</a>
-@endif
-@endauth
+@endcan
 @endsection

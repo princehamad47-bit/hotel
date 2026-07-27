@@ -26,6 +26,7 @@
     </div>
 </div>
 
+@can('module-access', ['reservations', 'read'])
 <div class="card">
     <h3 class="section-title">Recent Usage</h3>
 
@@ -44,7 +45,15 @@
             <tbody>
                 @foreach ($tax->reservationTaxes as $reservationTax)
                 <tr>
-                    <td>{{ $reservationTax->reservation->reservation_code ?? '-' }}</td>
+                    <td>
+                        @if ($reservationTax->reservation)
+                        <a href="{{ route('reservations.show', $reservationTax->reservation) }}">
+                            {{ $reservationTax->reservation->reservation_code }}
+                        </a>
+                        @else
+                        -
+                        @endif
+                    </td>
                     <td>{{ $reservationTax->tax_name }}</td>
                     <td>{{ ucfirst($reservationTax->tax_type) }}</td>
                     <td>
@@ -64,12 +73,11 @@
     <p>No reservation usage found for this tax.</p>
     @endif
 </div>
+@endcan
 
 <a href="{{ route('taxes.index') }}" class="btn btn-secondary">Back</a>
 
-@auth
-@if (auth()->user()->isAdmin())
+@can('module-access', ['taxes', 'update'])
 <a href="{{ route('taxes.edit', $tax) }}" class="btn btn-warning">Edit</a>
-@endif
-@endauth
+@endcan
 @endsection

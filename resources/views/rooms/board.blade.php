@@ -63,33 +63,33 @@
 
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
                 @if ($room->status === 'available')
-                @auth
-                @if (auth()->user()->canManageFrontDesk())
+                @can('module-access', ['reservations', 'create'])
                 <a href="{{ route('reservations.create', ['room_id' => $room->id]) }}" class="btn btn-success">
                     Book Now
                 </a>
-                @else
+                @elsecan('module-access', ['rooms', 'read'])
                 <a href="{{ route('rooms.show', $room) }}" class="btn btn-secondary">
                     View
                 </a>
-                @endif
-                @endauth
+                @endcan
                 @elseif ($room->status === 'occupied' && $activeReservation)
-                @auth
-                @if (auth()->user()->canManageFrontDesk())
+                @can('module-access', ['reservations', 'read'])
                 <a href="{{ route('reservations.show', $activeReservation) }}" class="btn btn-primary">
                     Open Reservation
                 </a>
-                @endif
-                @endauth
+                @endcan
 
+                @can('module-access', ['rooms', 'read'])
                 <a href="{{ route('rooms.show', $room) }}" class="btn btn-secondary">
                     Room Details
                 </a>
+                @endcan
                 @else
+                @can('module-access', ['rooms', 'read'])
                 <a href="{{ route('rooms.show', $room) }}" class="btn btn-secondary">
                     View
                 </a>
+                @endcan
                 @endif
             </div>
         </div>

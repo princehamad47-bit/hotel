@@ -16,6 +16,7 @@
     </div>
 </div>
 
+@can('module-access', ['menu-items', 'read'])
 <div class="card">
     <h3 class="section-title">Menu Items</h3>
 
@@ -32,7 +33,11 @@
             <tbody>
                 @foreach ($menuCategory->menuItems as $menuItem)
                 <tr>
-                    <td>{{ $menuItem->name }}</td>
+                    <td>
+                        <a href="{{ route('menu-items.show', $menuItem) }}">
+                            {{ $menuItem->name }}
+                        </a>
+                    </td>
                     <td>{{ number_format($menuItem->price, 2) }}</td>
                     <td>{{ $menuItem->is_available ? 'Yes' : 'No' }}</td>
                 </tr>
@@ -44,7 +49,11 @@
     <p>No menu items found for this category.</p>
     @endif
 </div>
+@endcan
 
 <a href="{{ route('menu-categories.index') }}" class="btn btn-secondary">Back</a>
+
+@can('module-access', ['menu-categories', 'update'])
 <a href="{{ route('menu-categories.edit', $menuCategory) }}" class="btn btn-warning">Edit</a>
+@endcan
 @endsection

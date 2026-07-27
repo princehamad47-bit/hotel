@@ -68,30 +68,31 @@
 <div class="card">
     <h3 class="section-title">Quick Actions</h3>
     <div class="quick-links">
-        @can('module-access',['reservations', 'create'])
+        @can('module-access', ['reservations', 'create'])
         <a href="{{ route('reservations.create') }}" class="btn btn-primary">New Reservation</a>
         @endcan
-        @can('module-access',['guests', 'create'])
+        @can('module-access', ['guests', 'create'])
         <a href="{{ route('guests.create') }}" class="btn btn-success">Add Guest</a>
         @endcan
-        @can('module-access',['rooms', 'create'])
+        @can('module-access', ['rooms', 'read'])
         <a href="{{ route('rooms.index') }}" class="btn btn-warning">Open Rooms</a>
         @endcan
-        @can('module-access',['services', 'create'])
+        @can('module-access', ['services', 'create'])
         <a href="{{ route('services.create') }}" class="btn btn-secondary">Add Service</a>
         @endcan
-        @can('module-access',['restaurant-orders', 'create'])
+        @can('module-access', ['restaurant-orders', 'create'])
         <a href="{{ route('restaurant-orders.create') }}" class="btn btn-primary">Add Order</a>
         @endcan
-        @can('module-access',['menu-categories', 'create'])
+        @can('module-access', ['menu-categories', 'create'])
         <a href="{{ route('menu-categories.create') }}" class="btn btn-success">Add Menu Categories</a>
         @endcan
-        @can('module-access',['menu-items', 'create'])
-        <a href="{{ route('menu-items.create') }}" class="btn btn-warning">Add Order</a>
+        @can('module-access', ['menu-items', 'create'])
+        <a href="{{ route('menu-items.create') }}" class="btn btn-warning">Add Menu Item</a>
         @endcan
     </div>
 </div>
 
+@can('module-access', ['reservations', 'read'])
 <div class="grid-2">
     <div class="card">
         <h3 class="section-title">Today's Arrivals</h3>
@@ -109,7 +110,11 @@
                 <tbody>
                     @foreach ($todayArrivals as $item)
                     <tr>
-                        <td>{{ $item->reservation_code }}</td>
+                        <td>
+                            <a href="{{ route('reservations.show', $item) }}">
+                                {{ $item->reservation_code }}
+                            </a>
+                        </td>
                         <td>{{ $item->guest->first_name }} {{ $item->guest->last_name }}</td>
                         <td>
                             <span class="badge badge-{{ $item->status }}">
@@ -142,7 +147,11 @@
                 <tbody>
                     @foreach ($todayDepartures as $item)
                     <tr>
-                        <td>{{ $item->reservation_code }}</td>
+                        <td>
+                            <a href="{{ route('reservations.show', $item) }}">
+                                {{ $item->reservation_code }}
+                            </a>
+                        </td>
                         <td>{{ $item->guest->first_name }} {{ $item->guest->last_name }}</td>
                         <td>
                             <span class="badge badge-{{ $item->status }}">
@@ -178,7 +187,11 @@
             <tbody>
                 @foreach ($inHouseGuests as $item)
                 <tr>
-                    <td>{{ $item->reservation_code }}</td>
+                    <td>
+                            <a href="{{ route('reservations.show', $item) }}">
+                                {{ $item->reservation_code }}
+                            </a>
+                        </td>
                     <td>{{ $item->guest->first_name }} {{ $item->guest->last_name }}</td>
                     <td>{{ $item->check_in_date->format('Y-m-d') }}</td>
                     <td>{{ $item->check_out_date->format('Y-m-d') }}</td>
@@ -212,7 +225,11 @@
             <tbody>
                 @foreach ($recentReservations as $reservation)
                 <tr>
-                    <td>{{ $reservation->reservation_code }}</td>
+                    <td>
+                        <a href="{{ route('reservations.show', $reservation) }}">
+                            {{ $reservation->reservation_code }}
+                        </a>
+                    </td>
                     <td>{{ $reservation->guest->first_name }} {{ $reservation->guest->last_name }}</td>
                     <td>{{ $reservation->check_in_date->format('Y-m-d') }}</td>
                     <td>{{ $reservation->check_out_date->format('Y-m-d') }}</td>
@@ -221,7 +238,7 @@
                             {{ str_replace('_', ' ', ucfirst($reservation->status)) }}
                         </span>
                     </td>
-                    <td>{{ number_format($reservation->total_amount, 2) }}</td>
+                    <td>{{ number_format($reservation->grand_total, 2) }}</td>
                 </tr>
                 @endforeach
             </tbody>
@@ -231,11 +248,12 @@
     <p class="muted">No reservations found yet.</p>
     @endif
 </div>
+@endcan
 
 @auth
 <div class="card">
     <p><strong>Logged in user:</strong> {{ auth()->user()->name }}</p>
-    <p><strong>Role:</strong> {{ ucfirst(auth()->user()->role->name) }}</p>
+    <p><strong>Role:</strong> {{ ucfirst(auth()->user()->role?->name ?? 'User') }}</p>
 </div>
 @endauth
 @endsection

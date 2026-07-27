@@ -144,7 +144,7 @@
     @php
     $roomTotal = $reservation->reservationRooms->sum('subtotal');
     $serviceTotal = $reservation->reservationServices->sum('total_price');
-    $restaurantTotal = $reservation->restaurantOrders->where('status', '!=', 'cancelled')->sum('grand_total');
+    $restaurantTotal = $reservation->restaurantOrders->where('status', '!=', 'cancelled')->sum('subtotal');
     $subTotal = $roomTotal + $serviceTotal + $restaurantTotal;
     $taxTotal = $reservation->taxes->sum('tax_amount');
     $grandTotal = $subTotal + $taxTotal;
@@ -258,7 +258,7 @@
                         <th>Type</th>
                         <th>Status</th>
                         <th>Items</th>
-                        <th>Total</th>
+                        <th>Subtotal</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -268,7 +268,7 @@
                         <td>{{ ucwords(str_replace('_', ' ', $restaurantOrder->order_type)) }}</td>
                         <td>{{ ucfirst($restaurantOrder->status) }}</td>
                         <td>{{ $restaurantOrder->items->count() }}</td>
-                        <td>{{ number_format($restaurantOrder->grand_total, 2) }}</td>
+                        <td>{{ number_format($restaurantOrder->subtotal, 2) }}</td>
                     </tr>
                     @empty
                     <tr>

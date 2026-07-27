@@ -4,6 +4,7 @@
 <h1 class="page-title">Add Restaurant Order</h1>
 
 <div class="card">
+    @can('module-access', ['restaurant-orders', 'create'])
     <form method="POST" action="{{ route('restaurant-orders.store') }}">
         @csrf
 
@@ -133,8 +134,16 @@
         <button type="submit" class="btn btn-success">Save Restaurant Order</button>
         <a href="{{ route('restaurant-orders.index') }}" class="btn btn-secondary">Back</a>
     </form>
+    @else
+    <p class="muted">You do not have permission to create restaurant orders.</p>
+
+    @can('module-access', ['restaurant-orders', 'read'])
+    <a href="{{ route('restaurant-orders.index') }}" class="btn btn-secondary">Back</a>
+    @endcan
+    @endcan
 </div>
 
+@can('module-access', ['restaurant-orders', 'create'])
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const orderType = document.getElementById('order_type');
@@ -230,4 +239,5 @@
         bindRemoveButtons();
     });
 </script>
+@endcan
 @endsection

@@ -687,65 +687,108 @@
         <h2>{{ config('app.name', 'Hotel Management') }}</h2>
 
         <div class="nav-links">
+            @can('module-access', ['dashboard', 'read'])
             <a href="{{ route('dashboard') }}">Home</a>
+            @endcan
 
-            @can('module-access',['rooms', 'read'])
+            @can('module-access', ['rooms', 'read'])
             <a href="{{ route('rooms.board') }}">Room Board</a>
             @endcan
 
-            @can('module-access',['reservations', 'read'])
+            @can('module-access', ['reservations', 'read'])
             <a href="{{ route('reservations.index') }}">Reservations</a>
             @endcan
-            @can('module-access',['restaurant-orders', 'read'])
+
+            @can('module-access', ['restaurant-orders', 'read'])
             <a href="{{ route('restaurant-orders.index') }}">Restaurant Orders</a>
             @endcan
+
+            @php
+            $canSeeMaintenance =
+            auth()->user()->can('module-access', ['guests', 'read']) ||
+            auth()->user()->can('module-access', ['reports', 'read']) ||
+            auth()->user()->can('module-access', ['rooms', 'read']) ||
+            auth()->user()->can('module-access', ['services', 'read']) ||
+            auth()->user()->can('module-access', ['reservation-services', 'read']) ||
+            auth()->user()->can('module-access', ['room-types', 'read']) ||
+            auth()->user()->can('module-access', ['staff', 'read']) ||
+            auth()->user()->can('module-access', ['taxes', 'read']) ||
+            auth()->user()->can('module-access', ['menu-categories', 'read']) ||
+            auth()->user()->can('module-access', ['menu-items', 'read']);
+            @endphp
+
+            @if ($canSeeMaintenance)
             <div class="dropdown">
-                <button type="button" class="dropdown-toggle">Maintenance ▾</button>
+                <button type="button" class="dropdown-toggle">
+                    Maintenance ▾
+                </button>
 
                 <div class="dropdown-menu">
-                    @can ('module-access',['guests', 'read'])
+                    @can('module-access', ['guests', 'read'])
                     <a href="{{ route('guests.index') }}">Guests</a>
                     @endcan
-                    @can ('module-access',['reports', 'read'])
+
+                    @can('module-access', ['reports', 'read'])
                     <a href="{{ route('reports.index') }}">Reports</a>
                     @endcan
-                    @can ('module-access',['rooms', 'read'])
+
+                    @can('module-access', ['rooms', 'read'])
                     <a href="{{ route('rooms.index') }}">Rooms</a>
                     @endcan
-                    @can ('module-access',['services', 'read'])
+
+                    @can('module-access', ['services', 'read'])
                     <a href="{{ route('services.index') }}">Services</a>
                     @endcan
-                    @can ('module-access',['reservations', 'read'])
-                    <a href="{{ route('reservation-services.index') }}">Reservation Services</a>
+
+                    @can('module-access', ['reservation-services', 'read'])
+                    <a href="{{ route('reservation-services.index') }}">
+                        Reservation Services
+                    </a>
                     @endcan
-                    @can ('module-access',['room-types', 'read'])
+
+                    @can('module-access', ['room-types', 'read'])
                     <a href="{{ route('room-types.index') }}">Room Types</a>
                     @endcan
-                    @can ('module-access',['staff', 'read'])
+
+                    @can('module-access', ['staff', 'read'])
                     <a href="{{ route('staff.index') }}">Staff</a>
                     @endcan
-                    @can ('module-access',['taxes', 'read'])
+
+                    @can('module-access', ['taxes', 'read'])
                     <a href="{{ route('taxes.index') }}">Taxes</a>
                     @endcan
-                    @can ('module-access',['menu-categories', 'read'])
-                    <a href="{{ route('menu-categories.index') }}">Menu Categories</a>
+
+                    @can('module-access', ['menu-categories', 'read'])
+                    <a href="{{ route('menu-categories.index') }}">
+                        Menu Categories
+                    </a>
                     @endcan
-                    @can ('module-access',['menu-items', 'read'])
+
+                    @can('module-access', ['menu-items', 'read'])
                     <a href="{{ route('menu-items.index') }}">Menu Items</a>
                     @endcan
                 </div>
             </div>
+            @endif
 
             <div class="hotel-user-wrap">
                 <div class="hotel-user-circle">{{ $hotelMark }}</div>
 
                 <div class="hotel-user-menu">
-                    <div class="hotel-user-name">{{ auth()->user()->name }}</div>
-                    <div class="hotel-user-role">{{ ucfirst(auth()->user()->role->name) }}</div>
+                    <div class="hotel-user-name">
+                        {{ auth()->user()->name }}
+                    </div>
 
-                    <form method="POST" action="{{ route('logout') }}">
+                    <div class="hotel-user-role">
+                        {{ ucfirst(auth()->user()->role?->name ?? 'User') }}
+                    </div>
+
+                    <form method="POST" action="{{ route('logout') }}" class="inline-form">
                         @csrf
-                        <button type="submit" class="logout-btn">Logout</button>
+
+                        <button type="submit" class="btn btn-danger">
+                            Logout
+                        </button>
                     </form>
                 </div>
             </div>

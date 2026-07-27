@@ -4,8 +4,7 @@
 <h1 class="page-title">Add Tax</h1>
 
 <div class="card">
-    @auth
-    @if (auth()->user()->isAdmin())
+    @can('module-access', ['taxes', 'create'])
     <form method="POST" action="{{ route('taxes.store') }}">
         @csrf
 
@@ -50,7 +49,6 @@
     @else
     <p class="muted">You do not have permission to create taxes.</p>
     <a href="{{ route('taxes.index') }}" class="btn btn-secondary">Back</a>
-    @endif
-    @endauth
+    @endcan
 </div>
 @endsection

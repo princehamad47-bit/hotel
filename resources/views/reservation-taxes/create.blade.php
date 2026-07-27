@@ -8,6 +8,7 @@
     <p><strong>Guest:</strong> {{ $reservation->guest->first_name }} {{ $reservation->guest->last_name }}</p>
     <p><strong>Room Total:</strong> {{ number_format($reservation->room_total, 2) }}</p>
     <p><strong>Service Total:</strong> {{ number_format($reservation->service_total, 2) }}</p>
+    <p><strong>Restaurant Total:</strong> {{ number_format($reservation->restaurant_total, 2) }}</p>
     <p><strong>Subtotal:</strong> {{ number_format($reservation->sub_total, 2) }}</p>
 </div>
 
